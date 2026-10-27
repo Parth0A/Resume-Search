@@ -18,12 +18,23 @@ def _parse_skills(skills_text: str) -> list:
 
 
 def _render_results(results: dict) -> None:
+    """Render ranked candidates in a polished, evidence-first results workspace."""
+    from html import escape
+
     rows: list = results["results"]
     total: int = results["total_candidates"]
     skills_requested: list = results["skills_requested"]
 
-    st.markdown("---")
-    st.markdown("## Search results")
+    st.markdown(
+        """
+        <div class="section-heading">
+          <div class="section-eyebrow">MATCHING REPORT</div>
+          <h2>Candidate shortlist</h2>
+          <p>Ranked by text relevance to your selected role and skills.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
     st.caption(f"Showing {len(rows)} ranked candidates from {total:,} uploaded resumes.")
     if not rows:
         st.info("No matching resumes were found. Try broader keywords or fewer filters.")
@@ -32,10 +43,10 @@ def _render_results(results: dict) -> None:
     top_score = max(float(row["score"]) for row in rows)
     average_score = sum(float(row["score"]) for row in rows) / len(rows)
     a, b, c = st.columns(3)
-    a.metric("Candidates shortlisted", len(rows))
-    b.metric("Top relevance score", f"{top_score:.1%}")
-    c.metric("Average relevance score", f"{average_score:.1%}")
-    st.caption("Scores represent text similarity to your search terms—not hiring probability or candidate quality.")
+    a.metric("Shortlisted", f"{len(rows):,}", help="Candidates returned by the current search.")
+    b.metric("Top relevance", f"{top_score:.1%}", help="Highest text-similarity score in this shortlist.")
+    c.metric("Average relevance", f"{average_score:.1%}", help="Mean text-similarity score for the displayed candidates.")
+    st.caption("Relevance is text similarity—not hiring probability, candidate quality, or a recommendation to hire.")
 
     overview = []
     for rank, row in enumerate(rows, start=1):
@@ -47,44 +58,71 @@ def _render_results(results: dict) -> None:
             "Experience detected": f"{row['experience']} years" if row["experience"] is not None else "Not detected",
             "Skills matched": f"{len(row['matched_skills'])}/{len(skills_requested)}" if skills_requested else "Not specified",
         })
-    with st.expander("Ranked overview", expanded=True):
+    with st.expander("View ranked table", expanded=False):
         st.dataframe(overview, use_container_width=True, hide_index=True)
 
-    st.markdown("### Candidate profiles")
+    st.markdown("### Ranked candidates")
     for rank, row in enumerate(rows, start=1):
         candidate = f"Candidate {row['original_index'] + 1}"
-        score = float(row["score"])
-        with st.expander(f"#{rank}  ·  {candidate}  ·  {score:.1%} relevance"):
-            left, right = st.columns(2)
-            with left:
-                st.markdown("**Resume category**")
-                st.write(row["category"] or "Not specified")
-                st.markdown("**Detected experience**")
-                st.write(f"{row['experience']} years" if row["experience"] is not None else "Not detected")
-            with right:
-                st.markdown("**Text relevance**")
-                st.progress(max(0.0, min(1.0, score)))
-                st.caption(f"{score:.1%} similarity score")
+        score = max(0.0, min(1.0, float(row["score"])))
+        category = escape(str(row["category"] or "Not specified"))
+        experience = f"{row['experience']} years" if row["experience"] is not None else "Not detected"
+        skills_summary = (
+            f"{len(row['matched_skills'])} of {len(skills_requested)} requested skills detected"
+            if skills_requested else "No required skills filter"
+        )
+        st.markdown(
+            f"""
+            <div class="candidate-card">
+              <div class="candidate-card-top">
+                <div class="candidate-rank">#{rank:02d}</div>
+                <div class="candidate-identity">
+                  <div class="candidate-name">{escape(candidate)}</div>
+                  <div class="candidate-meta">{category} <span class="meta-dot">•</span> {escape(experience)}</div>
+                </div>
+                <div class="score-badge">{score:.1%}<span> match</span></div>
+              </div>
+              <div class="candidate-progress"><span style="width:{score * 100:.2f}%"></span></div>
+              <div class="candidate-footnote">{escape(skills_summary)}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        left, right = st.columns([1, 1], gap="large")
+        with left:
+            st.markdown("**Matching requested skills**")
+            if skills_requested and row["matched_skills"]:
+                st.markdown(
+                    " ".join(f'<span class="skill-chip">{escape(str(skill))}</span>' for skill in row["matched_skills"]),
+                    unsafe_allow_html=True,
+                )
+            elif skills_requested:
+                st.write("No requested skills detected.")
+            else:
+                st.caption("Add skills to your search to see skill-level matches.")
+        with right:
             if skills_requested:
-                st.markdown("**Matching requested skills**")
-                if row["matched_skills"]:
-                    st.success(" · ".join(row["matched_skills"]))
-                else:
-                    st.write("No requested skills detected.")
                 st.markdown("**Skills not detected**")
                 if row["missing_skills"]:
-                    st.warning(" · ".join(row["missing_skills"]))
+                    st.markdown(
+                        " ".join(f'<span class="skill-chip skill-chip-muted">{escape(str(skill))}</span>' for skill in row["missing_skills"]),
+                        unsafe_allow_html=True,
+                    )
                 else:
-                    st.write("All requested skills were detected in the text.")
-            st.markdown("**Resume text**")
+                    st.caption("All requested skills were detected in the text.")
+            else:
+                st.markdown("**Candidate category**")
+                st.write(row["category"] or "Not specified")
+        with st.expander(f"Review resume text · {candidate}", expanded=False):
             st.text_area(
                 "Resume content",
-                value=row["resume_text"],
+                value=str(row["resume_text"]),
                 key=f"resume_{row['original_index']}",
                 height=180,
                 label_visibility="collapsed",
                 disabled=True,
             )
+        st.markdown('<div class="candidate-divider"></div>', unsafe_allow_html=True)
 
     export_df = _prepare_export_data(rows, total)
     if not export_df.empty:
@@ -110,219 +148,117 @@ def _main() -> None:
     st.markdown(
         """
         <style>
-        :root { --rs-navy: #142b59; --rs-navy-strong: #10234b; --rs-sky-soft: #edf6ff; --rs-border: #18396f; --rs-text: #172642; --rs-muted: #63718a; }
-        .stApp { background: #f7f9fd; color: var(--rs-text); }
-        .main .block-container { max-width: 1180px; padding-top: 1.4rem; padding-bottom: 3rem; }
-        [data-testid="stSidebar"] { background: #101b31; }
+        :root {
+          --rs-navy: #142b59;
+          --rs-navy-deep: #0e1c38;
+          --rs-blue: #3156a6;
+          --rs-sky: #edf5ff;
+          --rs-border: #cbd7ea;
+          --rs-text: #172642;
+          --rs-muted: #66758e;
+          --rs-surface: #ffffff;
+        }
+        .stApp { background: #f6f8fc; color: var(--rs-text); }
+        .main .block-container { max-width: 1320px; padding: 1.5rem 2rem 3rem; }
+        [data-testid="stSidebar"] { background: var(--rs-navy-deep); border-right: 1px solid #263b62; }
         [data-testid="stSidebar"] * { color: #eef3ff; }
-        [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p { color: #c7d3ee; }
-
-        /* Clean outlined cards: no solid fill, navy border, rounded corners. */
-        div[data-testid="stFileUploader"],
-        div[data-testid="stForm"],
-        div[data-testid="stMetric"],
-        div[data-testid="stExpander"],
-        div[data-testid="stVerticalBlockBorderWrapper"] {
-            background: transparent !important;
-            border: 1.5px solid var(--rs-border) !important;
-            border-radius: 18px !important;
-            box-shadow: none !important;
+        [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p { color: #c5d2ec; }
+        [data-testid="stSidebar"] button { border-color: #41557a !important; }
+        .brand-mark { display:flex; align-items:center; gap:10px; padding:8px 2px 22px; font-size:1.22rem; font-weight:800; color:#fff; }
+        .brand-icon { display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:12px; background:#fff; color:var(--rs-navy) !important; font-size:1.25rem; }
+        .brand-accent { color:#9eb8ff; }
+        .side-note { border:1px solid #344766; background:#152744; border-radius:14px; padding:13px; color:#dbe5ff; font-size:.83rem; line-height:1.55; }
+        .profile-card { text-align:center; padding:16px 10px 14px; border:1.5px solid #536b96; border-radius:18px; background:rgba(255,255,255,.035); margin:8px 0 12px; }
+        .profile-card-label,.avatar-picker-label { color:#93a6ca; font-size:.62rem; font-weight:800; letter-spacing:.16em; text-align:center; }
+        .profile-avatar { display:flex; align-items:center; justify-content:center; width:68px; height:68px; margin:12px auto 10px; border-radius:22px; border:1.5px solid #829ac2; background:linear-gradient(145deg,#f8fbff,#dce8ff); color:#142b59; font-size:2rem; font-weight:850; box-shadow:0 8px 20px rgba(0,0,0,.15); }
+        .profile-name { color:#fff; font-size:1rem; font-weight:800; }
+        .profile-email { color:#c5d2ec; font-size:.76rem; overflow-wrap:anywhere; margin-top:3px; }
+        .profile-caption { color:#93a6ca; font-size:.7rem; margin-top:9px; }
+        .avatar-picker-label { margin:12px 0 6px; }
+        [data-testid="stSidebar"] div.stButton > button { min-height:2.35rem; padding:.2rem; font-size:1.05rem; border-radius:10px !important; }
+        [data-testid="stSidebar"] div[data-testid="stExpander"] { background:transparent !important; border-color:#536b96 !important; }
+        .sidebar-footer { color:#93a6ca; font-size:.62rem; font-weight:800; letter-spacing:.16em; padding-top:12px; }
+        .sidebar-footer span { color:#6d8fd5; padding:0 4px; }
+        .about-hero { padding:2.3rem 2.4rem; border:1.5px solid #18396f; border-radius:24px; background:linear-gradient(135deg,#fff 0%,#f4f8ff 100%); margin-bottom:1.8rem; }
+        .about-kicker { color:#526fa8; font-size:.7rem; letter-spacing:.2em; font-weight:800; text-transform:uppercase; }
+        .created-by { margin-top:1.2rem; color:#66758e; font-size:.78rem; letter-spacing:.19em; font-weight:750; }
+        .created-by span { display:inline-block; color:#142b59; font-family:Georgia,'Times New Roman',serif; font-size:1.03rem; letter-spacing:.13em; margin-left:5px; }
+        .about-hero h1 { color:#142b59; font-size:clamp(2.4rem,5vw,3.8rem); font-weight:850; letter-spacing:-.055em; margin:.75rem 0; }
+        .about-lede { color:#53627b; max-width:800px; font-size:1.05rem; line-height:1.8; }
+        .about-tags { display:flex; flex-wrap:wrap; gap:8px; margin-top:1.25rem; }
+        .about-tags span { border:1px solid #18396f; color:#18396f; border-radius:999px; padding:6px 11px; font-size:.78rem; font-weight:700; }
+        .about-flow { max-width:820px; margin:1.2rem auto 2rem; }
+        .flow-node { display:grid; grid-template-columns:48px 1fr; column-gap:12px; padding:16px 18px; border:1.5px solid #18396f; border-radius:16px; background:transparent; }
+        .flow-node span { grid-row:span 2; display:flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:12px; background:#edf5ff; color:#142b59; font-weight:850; }
+        .flow-node b { color:#142b59; font-size:1rem; align-self:end; }
+        .flow-node small { color:#66758e; font-size:.84rem; line-height:1.55; margin-top:4px; }
+        .flow-arrow { color:#3156a6; text-align:center; font-size:1.4rem; font-weight:800; padding:5px; }
+        @media(max-width:800px) { .about-hero { padding:1.4rem; } .created-by { line-height:1.9; } .created-by span { margin-left:0; } .flow-node { padding:13px; grid-template-columns:42px 1fr; } }
+        .hero { background:linear-gradient(115deg,#101e3a 0%,#1b3569 68%,#3156a6 100%); border:1px solid #294578; border-radius:22px; padding:2rem 2.2rem; color:#fff; margin:0 0 2rem; box-shadow:0 16px 38px rgba(20,43,89,.12); }
+        .hero-kicker,.section-eyebrow { color:#b9ccff; font-size:.72rem; font-weight:800; letter-spacing:.15em; text-transform:uppercase; }
+        .hero h1 { color:#fff; font-size:clamp(2.1rem,4vw,3.1rem); line-height:1.08; letter-spacing:-.045em; margin:.65rem 0 .8rem; }
+        .hero p { color:#e1eaff; font-size:1rem; line-height:1.7; max-width:760px; margin:0; }
+        .section-heading { margin:.3rem 0 1rem; }
+        .section-heading .section-eyebrow { color:#4969a8; margin-bottom:.35rem; }
+        .section-heading h2 { color:var(--rs-navy); font-size:1.65rem; letter-spacing:-.025em; margin:0 0 .25rem; }
+        .section-heading p { color:var(--rs-muted); margin:0; }
+        h2,h3 { color:var(--rs-navy); letter-spacing:-.02em; }
+        p,.stCaption { color:var(--rs-muted); }
+        div[data-testid="stForm"] { background:transparent !important; border:1.5px solid #18396f !important; border-radius:20px !important; padding:1.3rem 1.4rem 1.1rem !important; box-shadow:none !important; }
+        div[data-testid="stFileUploader"] { background:transparent !important; border:1.5px solid #18396f !important; border-radius:18px !important; padding:1rem !important; box-shadow:none !important; }
+        div[data-testid="stFileUploader"] section { background:transparent !important; border:1.5px dashed #18396f !important; border-radius:12px !important; }
+        div[data-testid="stMetric"] { background:transparent !important; border:1.5px solid #18396f !important; border-radius:16px !important; padding:1rem 1.1rem !important; box-shadow:none !important; }
+        div[data-testid="stMetricLabel"] { color:#66758e !important; font-weight:650; }
+        div[data-testid="stMetricValue"] { color:var(--rs-navy) !important; font-weight:800; }
+        div[data-testid="stExpander"] { background:transparent !important; border:1.5px solid #18396f !important; border-radius:14px !important; overflow:hidden; }
+        div[data-testid="stTextInput"] input, div[data-testid="stNumberInput"] input, div[data-testid="stSelectbox"] [data-baseweb="select"] > div { background:transparent !important; color:var(--rs-text) !important; border:1.5px solid #18396f !important; border-radius:11px !important; min-height:2.7rem; }
+        div[data-testid="stMultiSelect"] [data-baseweb="select"] > div { background:var(--rs-sky) !important; color:var(--rs-text) !important; border:1px solid #9bb5dc !important; border-radius:12px !important; min-height:2.8rem; }
+        div[data-testid="stMultiSelect"] [data-baseweb="tag"] { background:var(--rs-navy) !important; border:1px solid var(--rs-navy) !important; border-radius:999px !important; }
+        div[data-testid="stMultiSelect"] [data-baseweb="tag"] * { color:#fff !important; fill:#fff !important; }
+        div.stButton > button, div.stFormSubmitButton > button, div.stDownloadButton > button { border:1px solid #b8c8e0 !important; border-radius:11px !important; font-weight:700; min-height:2.75rem; box-shadow:none !important; }
+        div.stFormSubmitButton > button[kind="primary"], div.stDownloadButton > button[kind="primary"] { background:var(--rs-navy) !important; color:#fff !important; border-color:var(--rs-navy) !important; }
+        div.stButton > button:hover, div.stFormSubmitButton > button:hover, div.stDownloadButton > button:hover { border-color:var(--rs-blue) !important; color:var(--rs-blue) !important; }
+        .candidate-card { border:1.5px solid #18396f; border-radius:17px; background:transparent; padding:1.15rem 1.25rem .95rem; margin:.8rem 0 .65rem; box-shadow:none; }
+        .candidate-card-top { display:flex; align-items:center; gap:14px; }
+        .candidate-rank { display:flex; align-items:center; justify-content:center; flex:0 0 44px; height:44px; border-radius:13px; background:#edf3ff; color:var(--rs-navy); font-size:.95rem; font-weight:850; }
+        .candidate-identity { min-width:0; flex:1; }
+        .candidate-name { color:var(--rs-navy); font-size:1.08rem; font-weight:800; }
+        .candidate-meta { color:#66758e; font-size:.85rem; margin-top:3px; }
+        .meta-dot { padding:0 5px; color:#9aa9c1; }
+        .score-badge { white-space:nowrap; background:#edf5ff; border:1px solid #c7d9f5; color:var(--rs-navy); padding:8px 11px; border-radius:12px; font-weight:850; }
+        .score-badge span { font-size:.72rem; font-weight:650; }
+        .candidate-progress { height:5px; background:#e9eef7; border-radius:99px; overflow:hidden; margin:1rem 0 .7rem; }
+        .candidate-progress span { display:block; height:100%; border-radius:99px; background:linear-gradient(90deg,#18396f,#527ac0); }
+        .candidate-footnote { color:#66758e; font-size:.8rem; }
+        .skill-chip { display:inline-block; background:#142b59; color:#fff; border:1px solid #142b59; border-radius:999px; padding:4px 10px; margin:0 5px 5px 0; font-size:.78rem; font-weight:650; }
+        .skill-chip-muted { background:#f2f5fa; color:#52617b; border-color:#d8e0ec; }
+        .candidate-divider { height:1px; background:#e3e9f3; margin:1.2rem 0; }
+        div[data-testid="stProgress"] > div > div { background:linear-gradient(90deg,#18396f,#547dbb); }
+        .small-note { color:#66758e; font-size:.93rem; }
+        .footer-note { color:#7b869b; text-align:center; font-size:.82rem; padding-top:1.8rem; }
+        @media(max-width:800px) { .main .block-container { padding:1rem .8rem 2rem; } .hero { padding:1.4rem; border-radius:16px; } .candidate-card { padding:1rem; } .score-badge { padding:6px 8px; } }
+        /* Olive-green feedback palette; avoid red alert accents */
+        :root {
+          --rs-olive: #6b762b;
+          --rs-olive-dark: #50591f;
+          --rs-olive-light: #f1f3e5;
         }
-        div[data-testid="stFileUploader"] { padding: .85rem; }
-        div[data-testid="stForm"] { padding: 1.2rem 1.3rem 1rem; }
-        div[data-testid="stMetric"] { padding: 1rem; }
-        div[data-testid="stExpander"] { overflow: hidden; }
-        /* Inputs remain easy to spot; only the skill search/input area gets a faint sky tint. */
-        div[data-testid="stTextInput"] input,
-        div[data-testid="stNumberInput"] input,
-        div[data-testid="stSelectbox"] div[data-baseweb="select"] > div,
-        div[data-testid="stFileUploader"] section {
-            border: 1.5px solid var(--rs-border) !important;
-            border-radius: 12px !important;
-            box-shadow: none !important;
+        div[data-testid="stAlert"] {
+          border-color: var(--rs-olive) !important;
         }
-        div[data-testid="stMultiSelect"] div[data-baseweb="select"] > div {
-            background: var(--rs-sky-soft) !important;
-            border: 1.5px solid var(--rs-border) !important;
-            border-radius: 13px !important;
-            min-height: 2.8rem;
-            box-shadow: none !important;
+        div[data-testid="stAlert"] [data-testid="stMarkdownContainer"],
+        div[data-testid="stAlert"] svg,
+        div[data-testid="stAlert"] svg * {
+          color: var(--rs-olive-dark) !important;
+          fill: var(--rs-olive) !important;
         }
-        /* Selected skill chips: navy fill, white text, rounded edges. */
-        div[data-testid="stMultiSelect"] [data-baseweb="tag"] {
-            background: var(--rs-navy) !important;
-            border: 1px solid var(--rs-navy-strong) !important;
-            border-radius: 999px !important;
-            padding: 2px 5px;
+        div[data-testid="stAlert"][kind="error"] {
+          background: var(--rs-olive-light) !important;
+          border-color: var(--rs-olive) !important;
         }
-        div[data-testid="stMultiSelect"] [data-baseweb="tag"] *,
-        div[data-testid="stMultiSelect"] [data-baseweb="tag"] span {
-            color: #ffffff !important;
-            fill: #ffffff !important;
-        }
-        div[data-testid="stMultiSelect"] input { background: transparent !important; }
-        div.stButton > button, div.stFormSubmitButton > button, div.stDownloadButton > button {
-            border: 1.5px solid var(--rs-border) !important;
-            border-radius: 12px !important;
-            font-weight: 650;
-            min-height: 2.7rem;
-            box-shadow: none !important;
-        }
-        div.stFormSubmitButton > button[kind="primary"] {
-            background: var(--rs-navy) !important;
-            color: #ffffff !important;
-        }
-        div[data-testid="stProgress"] > div > div { background: linear-gradient(90deg, #18396f, #547dbb); }
-        /* When Streamlit is in dark theme, use a black canvas and white controls/cards. */
-        [data-theme="dark"] .stApp, html[data-theme="dark"] .stApp,
-        [data-testid="stAppViewContainer"][data-theme="dark"] {
-            background: #05070b !important;
-            color: #f5f7fb !important;
-        }
-        [data-theme="dark"] div[data-testid="stFileUploader"],
-        [data-theme="dark"] div[data-testid="stForm"],
-        [data-theme="dark"] div[data-testid="stMetric"],
-        [data-theme="dark"] div[data-testid="stExpander"],
-        [data-theme="dark"] div[data-testid="stVerticalBlockBorderWrapper"],
-        html[data-theme="dark"] div[data-testid="stFileUploader"],
-        html[data-theme="dark"] div[data-testid="stForm"],
-        html[data-theme="dark"] div[data-testid="stMetric"],
-        html[data-theme="dark"] div[data-testid="stExpander"] {
-            background: #ffffff !important;
-            color: #172642 !important;
-            border-color: #18396f !important;
-        }
-        [data-theme="dark"] div[data-testid="stFileUploader"] *,
-        [data-theme="dark"] div[data-testid="stForm"] *,
-        [data-theme="dark"] div[data-testid="stMetric"] *,
-        [data-theme="dark"] div[data-testid="stExpander"] *,
-        html[data-theme="dark"] div[data-testid="stFileUploader"] *,
-        html[data-theme="dark"] div[data-testid="stForm"] *,
-        html[data-theme="dark"] div[data-testid="stMetric"] *,
-        html[data-theme="dark"] div[data-testid="stExpander"] * {
-            color: #172642;
-        }
-        [data-theme="dark"] div[data-testid="stMultiSelect"] div[data-baseweb="select"] > div,
-        html[data-theme="dark"] div[data-testid="stMultiSelect"] div[data-baseweb="select"] > div {
-            background: #edf6ff !important;
-            border-color: #18396f !important;
-        }
-        [data-theme="dark"] div[data-testid="stTextInput"] input,
-        [data-theme="dark"] div[data-testid="stSelectbox"] div[data-baseweb="select"] > div,
-        html[data-theme="dark"] div[data-testid="stTextInput"] input,
-        html[data-theme="dark"] div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
-            background: #ffffff !important;
-            color: #172642 !important;
-            border-color: #18396f !important;
-        }
-        .brand-mark {
-            display: flex; align-items: center; gap: 10px; padding: 8px 2px 20px;
-            font-size: 1.25rem; font-weight: 800; color: white;
-        }
-        .brand-icon {
-            display: inline-flex; align-items: center; justify-content: center;
-            width: 38px; height: 38px; border-radius: 12px;
-            background: linear-gradient(135deg, #4d6bff, #8c74ff);
-            color: white; font-size: 1.2rem;
-        }
-        .brand-accent { color: #8ea6ff; }
-        .side-note {
-            border: 1px solid #34435f; background: #182641; border-radius: 12px;
-            padding: 12px; color: #dbe5ff; font-size: .83rem; line-height: 1.5;
-        }
-        .hero {
-            background: linear-gradient(125deg, #101b31 0%, #233b72 64%, #526fe2 100%);
-            border-radius: 20px; padding: 1.8rem 2rem; color: white;
-            margin-bottom: 1.6rem; box-shadow: 0 14px 35px rgba(25,43,91,.16);
-        }
-        .hero-kicker { color: #bdcaff; font-size: .76rem; font-weight: 750; letter-spacing: .13em; text-transform: uppercase; }
-        .hero h1 { color: white; font-size: clamp(2rem, 4vw, 2.8rem); line-height: 1.12; letter-spacing: -.04em; margin: .45rem 0 .65rem; }
-        .hero p { color: #e0e8ff; font-size: 1rem; line-height: 1.6; max-width: 730px; margin: 0; }
-        /* Final override: keep search/upload panels transparent with navy outlines. */
-        div[data-testid="stFileUploader"],
-        div[data-testid="stForm"],
-        div[data-testid="stMetric"],
-        div[data-testid="stExpander"],
-        div[data-testid="stVerticalBlockBorderWrapper"] {
-            background: transparent !important;
-            border: 1.5px solid #18396f !important;
-            border-radius: 18px !important;
-            box-shadow: none !important;
-        }
-        div[data-testid="stFileUploader"] section {
-            background: transparent !important;
-            border: 1.5px dashed #18396f !important;
-            border-radius: 14px !important;
-        }
-        div[data-testid="stTextInput"] input,
-        div[data-testid="stNumberInput"] input,
-        div[data-testid="stSelectbox"] [data-baseweb="select"] > div {
-            background: transparent !important;
-            color: var(--rs-text) !important;
-            border: 1.5px solid #18396f !important;
-            border-radius: 12px !important;
-        }
-        div[data-testid="stMultiSelect"] [data-baseweb="select"] > div {
-            background: #edf6ff !important;
-            color: #172642 !important;
-            border: 1.5px solid #18396f !important;
-            border-radius: 13px !important;
-        }
-        div[data-testid="stMultiSelect"] [data-baseweb="tag"] {
-            background: #142b59 !important;
-            border: 1px solid #10234b !important;
-            border-radius: 999px !important;
-        }
-        div[data-testid="stMultiSelect"] [data-baseweb="tag"] *,
-        div[data-testid="stMultiSelect"] [data-baseweb="tag"] span {
-            color: #ffffff !important;
-            fill: #ffffff !important;
-        }
-        div[data-testid="stFileUploader"] button,
-        div.stButton > button,
-        div.stFormSubmitButton > button,
-        div.stDownloadButton > button {
-            border: 1.5px solid #18396f !important;
-            border-radius: 12px !important;
-            box-shadow: none !important;
-        }
-        /* Streamlit versions expose theme on different ancestor elements. */
-        html[data-theme="dark"] .stApp,
-        [data-testid="stAppViewContainer"][data-theme="dark"] .stApp,
-        .stApp[data-theme="dark"] {
-            background: #05070b !important;
-            color: #f5f7fb !important;
-        }
-        html[data-theme="dark"] div[data-testid="stFileUploader"],
-        html[data-theme="dark"] div[data-testid="stForm"],
-        html[data-theme="dark"] div[data-testid="stMetric"],
-        html[data-theme="dark"] div[data-testid="stExpander"],
-        html[data-theme="dark"] div[data-testid="stVerticalBlockBorderWrapper"],
-        [data-testid="stAppViewContainer"][data-theme="dark"] div[data-testid="stFileUploader"],
-        [data-testid="stAppViewContainer"][data-theme="dark"] div[data-testid="stForm"],
-        [data-testid="stAppViewContainer"][data-theme="dark"] div[data-testid="stMetric"],
-        [data-testid="stAppViewContainer"][data-theme="dark"] div[data-testid="stExpander"] {
-            background: #ffffff !important;
-            color: #172642 !important;
-            border-color: #18396f !important;
-        }
-        html[data-theme="dark"] div[data-testid="stTextInput"] input,
-        html[data-theme="dark"] div[data-testid="stNumberInput"] input,
-        html[data-theme="dark"] div[data-testid="stSelectbox"] [data-baseweb="select"] > div {
-            background: #ffffff !important;
-            color: #172642 !important;
-            border-color: #18396f !important;
-        }
-        html[data-theme="dark"] div[data-testid="stMultiSelect"] [data-baseweb="select"] > div {
-            background: #edf6ff !important;
-            color: #172642 !important;
-            border-color: #18396f !important;
-        }
-        .small-note { color: #68758d; font-size: .92rem; }
-        .footer-note { color: #7b869b; text-align: center; font-size: .82rem; padding-top: 1.8rem; }
-        @media (max-width: 700px) {
-            .main .block-container { padding: 1rem .8rem 2rem; }
-            .hero { padding: 1.35rem 1.15rem; border-radius: 15px; }
+        div[data-testid="stAlert"][kind="error"] * {
+          color: var(--rs-olive-dark) !important;
+          border-color: var(--rs-olive) !important;
         }
         </style>
         """,
@@ -410,21 +346,75 @@ def _main() -> None:
         return
 
     # Signed-in prototype controls
+    # Profile and navigation state are scoped to the current Streamlit session.
+    st.session_state.setdefault("rs_profile_name", "Parth Andhale")
+    st.session_state.setdefault("rs_profile_email", st.session_state.get("resume_search_email", ""))
+    st.session_state.setdefault("rs_avatar", "◈")
+    st.session_state.setdefault("rs_page", "Home")
+
     with st.sidebar:
         st.markdown(
             '<div class="brand-mark"><span class="brand-icon">⌕</span><span>Resume <span class="brand-accent">Search</span></span></div>',
             unsafe_allow_html=True,
         )
-        st.markdown("### Workspace")
-        st.markdown("🏠  **Home**")
-        st.markdown("📄  Upload Resumes")
-        st.markdown("🔎  Search Candidates")
-        st.markdown("---")
+        avatar_options = [
+            ("Diamond", "◆"), ("Spark", "✦"), ("Orbit", "◉"), ("Code", "‹ ›"),
+            ("Monogram", "P"), ("Compass", "✧"), ("Pixel", "✷"), ("Wave", "◌"),
+        ]
+        if st.session_state["rs_avatar"] not in [glyph for _, glyph in avatar_options]:
+            st.session_state["rs_avatar"] = "◆"
         st.markdown(
-            '<div class="side-note"><b>Simple. Focused. Useful.</b><br>Find relevant resumes, review the evidence, and export your shortlist.</div>',
+            f"""
+            <div class="profile-card">
+              <div class="profile-card-label">YOUR PROFILE</div>
+              <div class="profile-avatar">{st.session_state["rs_avatar"]}</div>
+              <div class="profile-name">{st.session_state["rs_profile_name"] or "Your name"}</div>
+              <div class="profile-email">{st.session_state["rs_profile_email"] or "Add your email"}</div>
+              <div class="profile-caption">Personalize your workspace</div>
+            </div>
+            """,
             unsafe_allow_html=True,
         )
-        st.caption("Prototype · CSV-based search")
+        if st.button("✦  Change icon", key="rs_change_avatar", use_container_width=True):
+            st.session_state["rs_show_avatar_picker"] = not st.session_state.get(
+                "rs_show_avatar_picker", False
+            )
+
+        if st.session_state.get("rs_show_avatar_picker", False):
+            st.markdown(
+                '<div class="avatar-picker-label">CHOOSE YOUR ICON</div>',
+                unsafe_allow_html=True,
+            )
+            avatar_cols = st.columns(4)
+            for index, (avatar_name, glyph) in enumerate(avatar_options):
+                with avatar_cols[index % 4]:
+                    if st.button(
+                        glyph,
+                        key=f"rs_avatar_choice_{index}",
+                        help=avatar_name,
+                        use_container_width=True,
+                        type="primary" if st.session_state["rs_avatar"] == glyph else "secondary",
+                    ):
+                        st.session_state["rs_avatar"] = glyph
+                        st.session_state["rs_show_avatar_picker"] = False
+                        st.rerun()
+        with st.expander("Edit profile", expanded=False):
+            st.text_input("Display name", key="rs_profile_name", placeholder="Your name")
+            st.text_input("Email", key="rs_profile_email", placeholder="you@example.com")
+            st.caption("Profile details are kept for this browser session.")
+        st.markdown("---")
+        st.markdown("### Workspace")
+        if st.button("⌂   Home", use_container_width=True, type="primary" if st.session_state["rs_page"] == "Home" else "secondary"):
+            st.session_state["rs_page"] = "Home"
+            st.rerun()
+        if st.button("ⓘ   About this project", use_container_width=True, type="primary" if st.session_state["rs_page"] == "About" else "secondary"):
+            st.session_state["rs_page"] = "About"
+            st.rerun()
+        st.markdown(
+            '<div class="side-note"><b>Resume Search</b><br>Discover relevant resumes, understand skill matches, and use optional AI tools to support review.</div>',
+            unsafe_allow_html=True,
+        )
+        st.markdown('<div class="sidebar-footer">RESUME SEARCH <span>·</span> TALENT DISCOVERY</div>', unsafe_allow_html=True)
         st.markdown("---")
         st.caption(f"Signed in as {st.session_state.get('resume_search_role', 'User')}")
         if st.button("Sign out", use_container_width=True):
@@ -432,7 +422,54 @@ def _main() -> None:
             st.session_state.pop("resume_search_email", None)
             st.session_state.pop("resume_search_role", None)
             st.session_state.pop("resume_search_user_id", None)
+            st.session_state.pop("resume_search_expires_at", None)
             st.rerun()
+
+    if st.session_state["rs_page"] == "About":
+        st.markdown(
+            """
+            <div class="about-hero">
+              <div class="about-kicker">A project built with purpose</div>
+              <div class="created-by">CREATED BY <span>PARTH ANDHALE</span></div>
+              <h1>Resume Search</h1>
+              <p class="about-lede">A focused resume discovery workspace that helps users search a resume dataset, inspect text-based matches, compare requested skills, and export a shortlist for further review.</p>
+              <div class="about-tags"><span>Resume discovery</span><span>Skill matching</span><span>AI-assisted insights</span></div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.markdown("## Project overview")
+        st.write("Resume Search is a prototype for making resume review more organized. Instead of opening each resume one by one, a user uploads a CSV dataset, selects a role, adds optional skills and experience criteria, and receives a ranked shortlist. The ranking is based on text similarity and the configured filters; it is a decision-support aid, not a hiring decision or a guarantee of candidate quality.")
+        st.markdown("## How it works")
+        st.markdown(
+            """
+            <div class="about-flow">
+              <div class="flow-node"><span>01</span><b>Upload dataset</b><small>Import a CSV containing resume text. Category is optional.</small></div>
+              <div class="flow-arrow">↓</div>
+              <div class="flow-node"><span>02</span><b>Choose role and criteria</b><small>Select a target job role, requested skills, minimum experience and result count.</small></div>
+              <div class="flow-arrow">↓</div>
+              <div class="flow-node"><span>03</span><b>Prepare resume text</b><small>The backend validates the CSV and identifies the supported resume-text column.</small></div>
+              <div class="flow-arrow">↓</div>
+              <div class="flow-node"><span>04</span><b>Rank relevant resumes</b><small>TF-IDF and cosine similarity compare resume text with the search query, with configured filters applied.</small></div>
+              <div class="flow-arrow">↓</div>
+              <div class="flow-node"><span>05</span><b>Review evidence</b><small>Inspect relevance scores, detected experience, matching skills, missing requested skills and resume text.</small></div>
+              <div class="flow-arrow">↓</div>
+              <div class="flow-node"><span>06</span><b>Export shortlist</b><small>Download the ranked results as CSV for further review.</small></div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.markdown("## Optional Gemini AI tools")
+        st.write("The app also includes three opt-in Gemini-powered tools: resume intelligence, skill-gap analysis, and job-description generation. These run only when the user requests an AI action. Resume content submitted to an AI action is sent to Google Gemini for processing. Keep API keys private, avoid uploading data without appropriate permission, and review AI-generated output rather than treating it as verified fact.")
+        st.markdown("## Technology and boundaries")
+        st.markdown("- **Interface:** Streamlit\n- **Data handling:** CSV upload and pandas\n- **Search:** TF-IDF vectorization and cosine similarity\n- **AI extensions:** Google Gemini through the Google GenAI SDK\n- **Export:** downloadable CSV shortlist")
+        st.markdown("## Responsible use")
+        st.write("Use relevance scores as navigation signals, not as an automated employment decision. Results depend on the text present in the dataset, and skills or experience may be missed if they are described differently. Review the original resume, apply consistent criteria, protect personal information, and verify findings independently.")
+        if st.button("← Back to workspace", type="primary"):
+            st.session_state["rs_page"] = "Home"
+            st.rerun()
+        st.markdown('<div class="footer-note">RESUME SEARCH · BUILT FOR CLEARER CANDIDATE DISCOVERY</div>', unsafe_allow_html=True)
+        return
 
     st.markdown(
         """

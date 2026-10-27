@@ -155,6 +155,73 @@ def _main() -> None:
         unsafe_allow_html=True,
     )
 
+    # Frontend-only login prototype. This is a UI gate, not secure authentication.
+    if "resume_search_signed_in" not in st.session_state:
+        st.session_state["resume_search_signed_in"] = False
+
+    if not st.session_state["resume_search_signed_in"]:
+        st.markdown(
+            """
+            <style>
+            .main .block-container { max-width: 1120px; padding-top: 2.2rem; }
+            [data-testid="stSidebar"] { display: none; }
+            .login-shell { display: grid; grid-template-columns: 1.05fr .95fr; gap: 2.5rem; align-items: center; min-height: 70vh; }
+            .login-brand { padding: 2.1rem .5rem; }
+            .login-logo { display:inline-flex; align-items:center; justify-content:center; width:48px; height:48px; border-radius:15px; background:linear-gradient(135deg,#4d6bff,#8c74ff); color:#fff; font-size:1.55rem; font-weight:800; margin-bottom:1.7rem; }
+            .login-eyebrow { color:#536ee6; text-transform:uppercase; letter-spacing:.15em; font-weight:800; font-size:.75rem; }
+            .login-title { font-size:clamp(2.5rem,5vw,4.2rem); line-height:1.04; letter-spacing:-.055em; color:#14213b; font-weight:850; margin:.65rem 0 1rem; }
+            .login-copy { color:#63718a; font-size:1.08rem; line-height:1.75; max-width:490px; }
+            .login-benefit { color:#34435e; font-size:.95rem; margin-top:1.2rem; }
+            .login-panel { background:#fff; border:1px solid #e1e7f2; border-radius:24px; padding:2rem; box-shadow:0 24px 70px rgba(30,48,90,.10); }
+            .login-panel h3 { color:#14213b; margin:0 0 .3rem; font-size:1.65rem; }
+            .login-muted { color:#71809a; font-size:.92rem; margin-bottom:1.2rem; }
+            .login-foot { color:#8a95a8; text-align:center; font-size:.8rem; margin-top:1rem; }
+            @media(max-width:760px) { .login-shell { grid-template-columns:1fr; gap:.5rem; min-height:auto; } .login-brand { padding:.5rem 0; } .login-title { font-size:2.6rem; } .login-panel { padding:1.35rem; } }
+            </style>
+            <div class="login-shell">
+              <section class="login-brand">
+                <div class="login-logo">⌕</div>
+                <div class="login-eyebrow">Smarter candidate discovery</div>
+                <div class="login-title">Find talent.<br>See the fit.</div>
+                <p class="login-copy">A focused workspace to search resumes, compare relevant skills, and build a shortlist with more clarity.</p>
+                <p class="login-benefit">✓ &nbsp; Skill-aware resume matching</p>
+                <p class="login-benefit">✓ &nbsp; Ranked candidate insights</p>
+                <p class="login-benefit">✓ &nbsp; Optional AI-assisted analysis</p>
+              </section>
+              <section class="login-panel">
+                <h3>Welcome back</h3>
+                <p class="login-muted">Sign in to open your Resume Search workspace.</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        login_left, login_right = st.columns([1.05, .95], gap="large")
+        with login_left:
+            st.markdown("")
+        with login_right:
+            with st.form("resume_search_login", clear_on_submit=False):
+                login_email = st.text_input("Email address", placeholder="you@company.com")
+                login_password = st.text_input("Password", type="password", placeholder="Enter your password")
+                login_role = st.selectbox("I am signing in as", ["Recruiter", "Job seeker"])
+                login_submit = st.form_submit_button("Sign in  →", type="primary", use_container_width=True)
+            if login_submit:
+                if not login_email.strip() or not login_password:
+                    st.error("Enter your email address and password to continue.")
+                elif "@" not in login_email or "." not in login_email.rsplit("@", 1)[-1]:
+                    st.error("Enter a valid email address.")
+                else:
+                    st.session_state["resume_search_signed_in"] = True
+                    st.session_state["resume_search_email"] = login_email.strip()
+                    st.session_state["resume_search_role"] = login_role
+                    st.rerun()
+        st.markdown(
+            '<div class="login-foot">Resume Search · College project prototype</div>',
+            unsafe_allow_html=True,
+        )
+        st.caption("Prototype notice: this screen is a visual login flow only. It does not verify accounts or securely authenticate users yet.")
+        return
+
+    # Signed-in prototype controls
     with st.sidebar:
         st.markdown(
             '<div class="brand-mark"><span class="brand-icon">⌕</span><span>Resume <span class="brand-accent">Search</span></span></div>',
@@ -170,6 +237,13 @@ def _main() -> None:
             unsafe_allow_html=True,
         )
         st.caption("Prototype · CSV-based search")
+        st.markdown("---")
+        st.caption(f"Signed in as {st.session_state.get('resume_search_role', 'User')}")
+        if st.button("Sign out", use_container_width=True):
+            st.session_state["resume_search_signed_in"] = False
+            st.session_state.pop("resume_search_email", None)
+            st.session_state.pop("resume_search_role", None)
+            st.rerun()
 
     st.markdown(
         """

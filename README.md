@@ -79,3 +79,33 @@ python -m pytest -q
   text and that it is a valid CSV.
 - If scores look unusual, confirm that the job title and skills are meaningful search
   terms and that the uploaded resumes contain usable text.
+
+## Optional Gemini AI tools
+
+The app includes three on-demand Gemini features:
+
+- **Resume Intelligence:** extracts a structured, evidence-based profile from one selected resume.
+- **Skill Gap Analyzer:** compares one resume with a pasted job description and distinguishes requirements not found in the text from skills a person may actually have.
+- **Job Description Generator:** drafts a job description from a title, skills, experience level, employment type, and optional context.
+
+### Configure Gemini locally
+
+1. Install dependencies in your existing virtual environment:
+   ```powershell
+   .\\.venv\\Scripts\\python.exe -m pip install -r requirements.txt
+   ```
+2. Copy `.env.example` to a local file named `.env`.
+3. Add your Gemini API key to `.env` as `GEMINI_API_KEY=your_key_here`.
+4. Restart Streamlit.
+
+Keep `.env` private. It is ignored by Git; never commit the real key or paste it into chat. If a key is ever exposed, revoke it in Google AI Studio and create a replacement.
+
+### Free-tier and privacy notes
+
+- AI requests happen only after a button click; normal search and CSV export continue to use the existing local TF-IDF backend.
+- The AI tools send only the selected resume and the relevant prompt text to Gemini, not the entire uploaded dataset.
+- Free-tier quotas and model availability can change. Requests may fail when quota is exhausted; the app does not automatically switch to paid billing.
+- Avoid unnecessary repeated requests and use synthetic or appropriately authorized resume data during demos.
+- AI outputs may be incomplete or wrong. Review them manually and never use them as the sole basis for a hiring decision.
+
+Set `GEMINI_MODEL` in `.env` if you need to choose a different model supported by your API account. The default configured in the code is `gemini-2.5-flash`.

@@ -111,7 +111,8 @@ def _main() -> None:
         uploaded_file = st.file_uploader(
             "Upload CSV",
             type=["csv"],
-            help="Upload a CSV containing a resume-text column (for example, "
+            max_upload_size=1024,
+            help="Upload a CSV up to 1 GB containing a resume-text column (for example, "
                  "`Resume_str`) and an optional `Category` column.",
         )
 

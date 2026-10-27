@@ -178,21 +178,21 @@ def _main() -> None:
         .section-heading p { color:var(--rs-muted); margin:0; }
         h2,h3 { color:var(--rs-navy); letter-spacing:-.02em; }
         p,.stCaption { color:var(--rs-muted); }
-        div[data-testid="stForm"] { background:#fff !important; border:1px solid var(--rs-border) !important; border-radius:20px !important; padding:1.3rem 1.4rem 1.1rem !important; box-shadow:0 8px 24px rgba(20,43,89,.045) !important; }
-        div[data-testid="stFileUploader"] { background:transparent !important; border:1.5px dashed #8299bf !important; border-radius:18px !important; padding:1rem !important; }
-        div[data-testid="stFileUploader"] section { background:#fff !important; border:0 !important; border-radius:12px !important; }
-        div[data-testid="stMetric"] { background:#fff !important; border:1px solid #d7e0ef !important; border-radius:16px !important; padding:1rem 1.1rem !important; box-shadow:0 6px 20px rgba(20,43,89,.035) !important; }
+        div[data-testid="stForm"] { background:transparent !important; border:1.5px solid #18396f !important; border-radius:20px !important; padding:1.3rem 1.4rem 1.1rem !important; box-shadow:none !important; }
+        div[data-testid="stFileUploader"] { background:transparent !important; border:1.5px solid #18396f !important; border-radius:18px !important; padding:1rem !important; box-shadow:none !important; }
+        div[data-testid="stFileUploader"] section { background:transparent !important; border:1.5px dashed #18396f !important; border-radius:12px !important; }
+        div[data-testid="stMetric"] { background:transparent !important; border:1.5px solid #18396f !important; border-radius:16px !important; padding:1rem 1.1rem !important; box-shadow:none !important; }
         div[data-testid="stMetricLabel"] { color:#66758e !important; font-weight:650; }
         div[data-testid="stMetricValue"] { color:var(--rs-navy) !important; font-weight:800; }
-        div[data-testid="stExpander"] { background:#fff !important; border:1px solid #d7e0ef !important; border-radius:14px !important; overflow:hidden; }
-        div[data-testid="stTextInput"] input, div[data-testid="stNumberInput"] input, div[data-testid="stSelectbox"] [data-baseweb="select"] > div { background:#fff !important; color:var(--rs-text) !important; border:1px solid #c8d4e7 !important; border-radius:11px !important; min-height:2.7rem; }
+        div[data-testid="stExpander"] { background:transparent !important; border:1.5px solid #18396f !important; border-radius:14px !important; overflow:hidden; }
+        div[data-testid="stTextInput"] input, div[data-testid="stNumberInput"] input, div[data-testid="stSelectbox"] [data-baseweb="select"] > div { background:transparent !important; color:var(--rs-text) !important; border:1.5px solid #18396f !important; border-radius:11px !important; min-height:2.7rem; }
         div[data-testid="stMultiSelect"] [data-baseweb="select"] > div { background:var(--rs-sky) !important; color:var(--rs-text) !important; border:1px solid #9bb5dc !important; border-radius:12px !important; min-height:2.8rem; }
         div[data-testid="stMultiSelect"] [data-baseweb="tag"] { background:var(--rs-navy) !important; border:1px solid var(--rs-navy) !important; border-radius:999px !important; }
         div[data-testid="stMultiSelect"] [data-baseweb="tag"] * { color:#fff !important; fill:#fff !important; }
         div.stButton > button, div.stFormSubmitButton > button, div.stDownloadButton > button { border:1px solid #b8c8e0 !important; border-radius:11px !important; font-weight:700; min-height:2.75rem; box-shadow:none !important; }
         div.stFormSubmitButton > button[kind="primary"], div.stDownloadButton > button[kind="primary"] { background:var(--rs-navy) !important; color:#fff !important; border-color:var(--rs-navy) !important; }
         div.stButton > button:hover, div.stFormSubmitButton > button:hover, div.stDownloadButton > button:hover { border-color:var(--rs-blue) !important; color:var(--rs-blue) !important; }
-        .candidate-card { border:1px solid #cbd7ea; border-radius:17px; background:#fff; padding:1.15rem 1.25rem .95rem; margin:.8rem 0 .65rem; box-shadow:0 7px 22px rgba(20,43,89,.045); }
+        .candidate-card { border:1.5px solid #18396f; border-radius:17px; background:transparent; padding:1.15rem 1.25rem .95rem; margin:.8rem 0 .65rem; box-shadow:none; }
         .candidate-card-top { display:flex; align-items:center; gap:14px; }
         .candidate-rank { display:flex; align-items:center; justify-content:center; flex:0 0 44px; height:44px; border-radius:13px; background:#edf3ff; color:var(--rs-navy); font-size:.95rem; font-weight:850; }
         .candidate-identity { min-width:0; flex:1; }

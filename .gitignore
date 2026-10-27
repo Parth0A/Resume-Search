@@ -17,3 +17,4 @@ resume_dataset.csv
 Thumbs.db
 *.pyc
 __pycache__
+resume_search.db

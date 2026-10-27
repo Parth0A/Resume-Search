@@ -110,11 +110,111 @@ def _main() -> None:
     st.markdown(
         """
         <style>
-        .stApp { background: #f4f7fc; }
+        :root { --rs-navy: #142b59; --rs-navy-strong: #10234b; --rs-sky-soft: #edf6ff; --rs-border: #18396f; --rs-text: #172642; --rs-muted: #63718a; }
+        .stApp { background: #f7f9fd; color: var(--rs-text); }
         .main .block-container { max-width: 1180px; padding-top: 1.4rem; padding-bottom: 3rem; }
         [data-testid="stSidebar"] { background: #101b31; }
         [data-testid="stSidebar"] * { color: #eef3ff; }
         [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p { color: #c7d3ee; }
+
+        /* Clean outlined cards: no solid fill, navy border, rounded corners. */
+        div[data-testid="stFileUploader"],
+        div[data-testid="stForm"],
+        div[data-testid="stMetric"],
+        div[data-testid="stExpander"],
+        div[data-testid="stVerticalBlockBorderWrapper"] {
+            background: transparent !important;
+            border: 1.5px solid var(--rs-border) !important;
+            border-radius: 18px !important;
+            box-shadow: none !important;
+        }
+        div[data-testid="stFileUploader"] { padding: .85rem; }
+        div[data-testid="stForm"] { padding: 1.2rem 1.3rem 1rem; }
+        div[data-testid="stMetric"] { padding: 1rem; }
+        div[data-testid="stExpander"] { overflow: hidden; }
+        /* Inputs remain easy to spot; only the skill search/input area gets a faint sky tint. */
+        div[data-testid="stTextInput"] input,
+        div[data-testid="stNumberInput"] input,
+        div[data-testid="stSelectbox"] div[data-baseweb="select"] > div,
+        div[data-testid="stFileUploader"] section {
+            border: 1.5px solid var(--rs-border) !important;
+            border-radius: 12px !important;
+            box-shadow: none !important;
+        }
+        div[data-testid="stMultiSelect"] div[data-baseweb="select"] > div {
+            background: var(--rs-sky-soft) !important;
+            border: 1.5px solid var(--rs-border) !important;
+            border-radius: 13px !important;
+            min-height: 2.8rem;
+            box-shadow: none !important;
+        }
+        /* Selected skill chips: navy fill, white text, rounded edges. */
+        div[data-testid="stMultiSelect"] [data-baseweb="tag"] {
+            background: var(--rs-navy) !important;
+            border: 1px solid var(--rs-navy-strong) !important;
+            border-radius: 999px !important;
+            padding: 2px 5px;
+        }
+        div[data-testid="stMultiSelect"] [data-baseweb="tag"] *,
+        div[data-testid="stMultiSelect"] [data-baseweb="tag"] span {
+            color: #ffffff !important;
+            fill: #ffffff !important;
+        }
+        div[data-testid="stMultiSelect"] input { background: transparent !important; }
+        div.stButton > button, div.stFormSubmitButton > button, div.stDownloadButton > button {
+            border: 1.5px solid var(--rs-border) !important;
+            border-radius: 12px !important;
+            font-weight: 650;
+            min-height: 2.7rem;
+            box-shadow: none !important;
+        }
+        div.stFormSubmitButton > button[kind="primary"] {
+            background: var(--rs-navy) !important;
+            color: #ffffff !important;
+        }
+        div[data-testid="stProgress"] > div > div { background: linear-gradient(90deg, #18396f, #547dbb); }
+        /* When Streamlit is in dark theme, use a black canvas and white controls/cards. */
+        [data-theme="dark"] .stApp, html[data-theme="dark"] .stApp,
+        [data-testid="stAppViewContainer"][data-theme="dark"] {
+            background: #05070b !important;
+            color: #f5f7fb !important;
+        }
+        [data-theme="dark"] div[data-testid="stFileUploader"],
+        [data-theme="dark"] div[data-testid="stForm"],
+        [data-theme="dark"] div[data-testid="stMetric"],
+        [data-theme="dark"] div[data-testid="stExpander"],
+        [data-theme="dark"] div[data-testid="stVerticalBlockBorderWrapper"],
+        html[data-theme="dark"] div[data-testid="stFileUploader"],
+        html[data-theme="dark"] div[data-testid="stForm"],
+        html[data-theme="dark"] div[data-testid="stMetric"],
+        html[data-theme="dark"] div[data-testid="stExpander"] {
+            background: #ffffff !important;
+            color: #172642 !important;
+            border-color: #18396f !important;
+        }
+        [data-theme="dark"] div[data-testid="stFileUploader"] *,
+        [data-theme="dark"] div[data-testid="stForm"] *,
+        [data-theme="dark"] div[data-testid="stMetric"] *,
+        [data-theme="dark"] div[data-testid="stExpander"] *,
+        html[data-theme="dark"] div[data-testid="stFileUploader"] *,
+        html[data-theme="dark"] div[data-testid="stForm"] *,
+        html[data-theme="dark"] div[data-testid="stMetric"] *,
+        html[data-theme="dark"] div[data-testid="stExpander"] * {
+            color: #172642;
+        }
+        [data-theme="dark"] div[data-testid="stMultiSelect"] div[data-baseweb="select"] > div,
+        html[data-theme="dark"] div[data-testid="stMultiSelect"] div[data-baseweb="select"] > div {
+            background: #edf6ff !important;
+            border-color: #18396f !important;
+        }
+        [data-theme="dark"] div[data-testid="stTextInput"] input,
+        [data-theme="dark"] div[data-testid="stSelectbox"] div[data-baseweb="select"] > div,
+        html[data-theme="dark"] div[data-testid="stTextInput"] input,
+        html[data-theme="dark"] div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
+            background: #ffffff !important;
+            color: #172642 !important;
+            border-color: #18396f !important;
+        }
         .brand-mark {
             display: flex; align-items: center; gap: 10px; padding: 8px 2px 20px;
             font-size: 1.25rem; font-weight: 800; color: white;
@@ -140,10 +240,6 @@ def _main() -> None:
         .hero p { color: #e0e8ff; font-size: 1rem; line-height: 1.6; max-width: 730px; margin: 0; }
         div[data-testid="stFileUploader"] { background: white; border: 1px solid #dfe6f3; border-radius: 16px; padding: .8rem; }
         div[data-testid="stForm"] { background: white; border: 1px solid #dfe6f3; border-radius: 16px; padding: 1.2rem 1.3rem 1rem; box-shadow: 0 5px 18px rgba(22,35,70,.04); }
-        div[data-testid="stMetric"] { background: white; border: 1px solid #dfe6f3; border-radius: 14px; padding: 1rem; }
-        div.stButton > button, div.stFormSubmitButton > button, div.stDownloadButton > button { border-radius: 10px; font-weight: 650; min-height: 2.7rem; }
-        div[data-testid="stExpander"] { background: white; border: 1px solid #dfe6f3; border-radius: 13px; overflow: hidden; }
-        div[data-testid="stProgress"] > div > div { background: linear-gradient(90deg, #4865d8, #8295f4); }
         .small-note { color: #68758d; font-size: .92rem; }
         .footer-note { color: #7b869b; text-align: center; font-size: .82rem; padding-top: 1.8rem; }
         @media (max-width: 700px) {

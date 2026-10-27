@@ -168,6 +168,24 @@ def _main() -> None:
         .brand-icon { display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:12px; background:#fff; color:var(--rs-navy) !important; font-size:1.25rem; }
         .brand-accent { color:#9eb8ff; }
         .side-note { border:1px solid #344766; background:#152744; border-radius:14px; padding:13px; color:#dbe5ff; font-size:.83rem; line-height:1.55; }
+        .profile-avatar { display:flex; align-items:center; justify-content:center; width:76px; height:76px; margin:4px auto 16px; border-radius:24px; border:1px solid #536b96; background:linear-gradient(145deg,#f8fbff,#dce8ff); color:#142b59; font-size:2.2rem; font-weight:850; box-shadow:0 10px 25px rgba(0,0,0,.15); }
+        .sidebar-footer { color:#93a6ca; font-size:.62rem; font-weight:800; letter-spacing:.16em; padding-top:12px; }
+        .sidebar-footer span { color:#6d8fd5; padding:0 4px; }
+        .about-hero { padding:2.3rem 2.4rem; border:1.5px solid #18396f; border-radius:24px; background:linear-gradient(135deg,#fff 0%,#f4f8ff 100%); margin-bottom:1.8rem; }
+        .about-kicker { color:#526fa8; font-size:.7rem; letter-spacing:.2em; font-weight:800; text-transform:uppercase; }
+        .created-by { margin-top:1.2rem; color:#66758e; font-size:.78rem; letter-spacing:.19em; font-weight:750; }
+        .created-by span { display:inline-block; color:#142b59; font-family:Georgia,'Times New Roman',serif; font-size:1.03rem; letter-spacing:.13em; margin-left:5px; }
+        .about-hero h1 { color:#142b59; font-size:clamp(2.4rem,5vw,3.8rem); font-weight:850; letter-spacing:-.055em; margin:.75rem 0; }
+        .about-lede { color:#53627b; max-width:800px; font-size:1.05rem; line-height:1.8; }
+        .about-tags { display:flex; flex-wrap:wrap; gap:8px; margin-top:1.25rem; }
+        .about-tags span { border:1px solid #18396f; color:#18396f; border-radius:999px; padding:6px 11px; font-size:.78rem; font-weight:700; }
+        .about-flow { max-width:820px; margin:1.2rem auto 2rem; }
+        .flow-node { display:grid; grid-template-columns:48px 1fr; column-gap:12px; padding:16px 18px; border:1.5px solid #18396f; border-radius:16px; background:transparent; }
+        .flow-node span { grid-row:span 2; display:flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:12px; background:#edf5ff; color:#142b59; font-weight:850; }
+        .flow-node b { color:#142b59; font-size:1rem; align-self:end; }
+        .flow-node small { color:#66758e; font-size:.84rem; line-height:1.55; margin-top:4px; }
+        .flow-arrow { color:#3156a6; text-align:center; font-size:1.4rem; font-weight:800; padding:5px; }
+        @media(max-width:800px) { .about-hero { padding:1.4rem; } .created-by { line-height:1.9; } .created-by span { margin-left:0; } .flow-node { padding:13px; grid-template-columns:42px 1fr; } }
         .hero { background:linear-gradient(115deg,#101e3a 0%,#1b3569 68%,#3156a6 100%); border:1px solid #294578; border-radius:22px; padding:2rem 2.2rem; color:#fff; margin:0 0 2rem; box-shadow:0 16px 38px rgba(20,43,89,.12); }
         .hero-kicker,.section-eyebrow { color:#b9ccff; font-size:.72rem; font-weight:800; letter-spacing:.15em; text-transform:uppercase; }
         .hero h1 { color:#fff; font-size:clamp(2.1rem,4vw,3.1rem); line-height:1.08; letter-spacing:-.045em; margin:.65rem 0 .8rem; }
@@ -297,21 +315,57 @@ def _main() -> None:
         return
 
     # Signed-in prototype controls
+    # Profile and navigation state are scoped to the current Streamlit session.
+    st.session_state.setdefault("rs_profile_name", "Parth Andhale")
+    st.session_state.setdefault("rs_profile_email", st.session_state.get("resume_search_email", ""))
+    st.session_state.setdefault("rs_avatar", "◈")
+    st.session_state.setdefault("rs_page", "Home")
+
     with st.sidebar:
         st.markdown(
             '<div class="brand-mark"><span class="brand-icon">⌕</span><span>Resume <span class="brand-accent">Search</span></span></div>',
             unsafe_allow_html=True,
         )
-        st.markdown("### Workspace")
-        st.markdown("🏠  **Home**")
-        st.markdown("📄  Upload Resumes")
-        st.markdown("🔎  Search Candidates")
-        st.markdown("---")
+        st.markdown("### Your profile")
+        avatar_options = {
+            "Navy diamond": "◆",
+            "Blue sparkle": "✦",
+            "Orbit": "◉",
+            "Code brackets": "‹ ›",
+            "Monogram P": "P",
+            "Compass": "✧",
+            "Pixel star": "✷",
+            "Circle wave": "◌",
+        }
+        current_avatar_label = next((label for label, glyph in avatar_options.items() if glyph == st.session_state["rs_avatar"]), "Navy diamond")
+        avatar_label = st.selectbox(
+            "Profile icon",
+            options=list(avatar_options.keys()),
+            index=list(avatar_options.keys()).index(current_avatar_label),
+            key="rs_avatar_picker",
+            label_visibility="collapsed",
+        )
+        st.session_state["rs_avatar"] = avatar_options[avatar_label]
         st.markdown(
-            '<div class="side-note"><b>Simple. Focused. Useful.</b><br>Find relevant resumes, review the evidence, and export your shortlist.</div>',
+            f'<div class="profile-avatar">{st.session_state["rs_avatar"]}</div>',
             unsafe_allow_html=True,
         )
-        st.caption("Prototype · CSV-based search")
+        st.text_input("Display name", key="rs_profile_name", placeholder="Your name")
+        st.text_input("Email", key="rs_profile_email", placeholder="you@example.com")
+        st.caption("Profile details are kept for this browser session.")
+        st.markdown("---")
+        st.markdown("### Workspace")
+        if st.button("⌂   Home", use_container_width=True, type="primary" if st.session_state["rs_page"] == "Home" else "secondary"):
+            st.session_state["rs_page"] = "Home"
+            st.rerun()
+        if st.button("ⓘ   About this project", use_container_width=True, type="primary" if st.session_state["rs_page"] == "About" else "secondary"):
+            st.session_state["rs_page"] = "About"
+            st.rerun()
+        st.markdown(
+            '<div class="side-note"><b>Resume Search</b><br>Discover relevant resumes, understand skill matches, and use optional AI tools to support review.</div>',
+            unsafe_allow_html=True,
+        )
+        st.markdown('<div class="sidebar-footer">RESUME SEARCH <span>·</span> TALENT DISCOVERY</div>', unsafe_allow_html=True)
         st.markdown("---")
         st.caption(f"Signed in as {st.session_state.get('resume_search_role', 'User')}")
         if st.button("Sign out", use_container_width=True):
@@ -319,7 +373,54 @@ def _main() -> None:
             st.session_state.pop("resume_search_email", None)
             st.session_state.pop("resume_search_role", None)
             st.session_state.pop("resume_search_user_id", None)
+            st.session_state.pop("resume_search_expires_at", None)
             st.rerun()
+
+    if st.session_state["rs_page"] == "About":
+        st.markdown(
+            """
+            <div class="about-hero">
+              <div class="about-kicker">A project built with purpose</div>
+              <div class="created-by">CREATED BY <span>PARTH ANDHALE</span></div>
+              <h1>Resume Search</h1>
+              <p class="about-lede">A focused resume discovery workspace that helps users search a resume dataset, inspect text-based matches, compare requested skills, and export a shortlist for further review.</p>
+              <div class="about-tags"><span>Resume discovery</span><span>Skill matching</span><span>AI-assisted insights</span></div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.markdown("## Project overview")
+        st.write("Resume Search is a prototype for making resume review more organized. Instead of opening each resume one by one, a user uploads a CSV dataset, selects a role, adds optional skills and experience criteria, and receives a ranked shortlist. The ranking is based on text similarity and the configured filters; it is a decision-support aid, not a hiring decision or a guarantee of candidate quality.")
+        st.markdown("## How it works")
+        st.markdown(
+            """
+            <div class="about-flow">
+              <div class="flow-node"><span>01</span><b>Upload dataset</b><small>Import a CSV containing resume text. Category is optional.</small></div>
+              <div class="flow-arrow">↓</div>
+              <div class="flow-node"><span>02</span><b>Choose role and criteria</b><small>Select a target job role, requested skills, minimum experience and result count.</small></div>
+              <div class="flow-arrow">↓</div>
+              <div class="flow-node"><span>03</span><b>Prepare resume text</b><small>The backend validates the CSV and identifies the supported resume-text column.</small></div>
+              <div class="flow-arrow">↓</div>
+              <div class="flow-node"><span>04</span><b>Rank relevant resumes</b><small>TF-IDF and cosine similarity compare resume text with the search query, with configured filters applied.</small></div>
+              <div class="flow-arrow">↓</div>
+              <div class="flow-node"><span>05</span><b>Review evidence</b><small>Inspect relevance scores, detected experience, matching skills, missing requested skills and resume text.</small></div>
+              <div class="flow-arrow">↓</div>
+              <div class="flow-node"><span>06</span><b>Export shortlist</b><small>Download the ranked results as CSV for further review.</small></div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.markdown("## Optional Gemini AI tools")
+        st.write("The app also includes three opt-in Gemini-powered tools: resume intelligence, skill-gap analysis, and job-description generation. These run only when the user requests an AI action. Resume content submitted to an AI action is sent to Google Gemini for processing. Keep API keys private, avoid uploading data without appropriate permission, and review AI-generated output rather than treating it as verified fact.")
+        st.markdown("## Technology and boundaries")
+        st.markdown("- **Interface:** Streamlit\n- **Data handling:** CSV upload and pandas\n- **Search:** TF-IDF vectorization and cosine similarity\n- **AI extensions:** Google Gemini through the Google GenAI SDK\n- **Export:** downloadable CSV shortlist")
+        st.markdown("## Responsible use")
+        st.write("Use relevance scores as navigation signals, not as an automated employment decision. Results depend on the text present in the dataset, and skills or experience may be missed if they are described differently. Review the original resume, apply consistent criteria, protect personal information, and verify findings independently.")
+        if st.button("← Back to workspace", type="primary"):
+            st.session_state["rs_page"] = "Home"
+            st.rerun()
+        st.markdown('<div class="footer-note">RESUME SEARCH · BUILT FOR CLEARER CANDIDATE DISCOVERY</div>', unsafe_allow_html=True)
+        return
 
     st.markdown(
         """

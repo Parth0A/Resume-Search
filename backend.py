@@ -29,7 +29,7 @@ SUPPORTED_EXPERIENCE_UNITS: List[str] = ["year", "years", "yr", "yrs"]
 MIN_FILE_SIZE_BYTES: int = 1
 """Minimum acceptable file size in bytes."""
 
-MAX_FILE_SIZE_BYTES: int = 1024 * 1024 * 1024
+MAX_FILE_SIZE_BYTES: int = 25 * 1024 * 1024
 """Maximum accepted CSV size in bytes (1 GiB)."""
 
 

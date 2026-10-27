@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import io
+import time
 import streamlit as st
 
 from backend import _prepare_export_data, load_resumes, search_resumes
@@ -156,8 +157,25 @@ def _main() -> None:
     )
 
     # Real local SQLite account authentication.
-    from auth import authenticate_user, initialize_auth_db, register_user
+    from auth import authenticate_user, get_user_by_id, initialize_auth_db, register_user
     initialize_auth_db()
+
+    # Streamlit session state is not an authentication database. Revalidate each
+    # rerun and expire inactive sessions after 30 minutes.
+    session_now = time.time()
+    session_user_id = st.session_state.get("resume_search_user_id")
+    session_expires_at = st.session_state.get("resume_search_expires_at", 0)
+    if st.session_state.get("resume_search_signed_in"):
+        if not session_user_id or session_now >= session_expires_at:
+            st.session_state["resume_search_signed_in"] = False
+        else:
+            current_user = get_user_by_id(session_user_id)
+            if current_user is None:
+                st.session_state["resume_search_signed_in"] = False
+            else:
+                st.session_state["resume_search_email"] = current_user["email"]
+                st.session_state["resume_search_role"] = current_user["role"]
+                st.session_state["resume_search_expires_at"] = session_now + 1800
 
     if "resume_search_signed_in" not in st.session_state:
         st.session_state["resume_search_signed_in"] = False
@@ -227,6 +245,7 @@ def _main() -> None:
                             st.session_state["resume_search_user_id"] = user["id"]
                             st.session_state["resume_search_email"] = user["email"]
                             st.session_state["resume_search_role"] = user["role"]
+                            st.session_state["resume_search_expires_at"] = time.time() + 1800
                             st.rerun()
                 except ValueError as error:
                     st.error(str(error))
@@ -258,6 +277,7 @@ def _main() -> None:
             st.session_state.pop("resume_search_email", None)
             st.session_state.pop("resume_search_role", None)
             st.session_state.pop("resume_search_user_id", None)
+            st.session_state.pop("resume_search_expires_at", None)
             st.rerun()
 
     st.markdown(
@@ -279,8 +299,8 @@ def _main() -> None:
     uploaded_file = st.file_uploader(
         "Drag and drop your resume CSV here, or browse files",
         type=["csv"],
-        max_upload_size=1024,
-        help="Configured upload limit: 1 GB. Very large datasets may still require substantial memory and processing time.",
+        max_upload_size=25,
+        help="Maximum upload size: 25 MB. Use a smaller CSV if your dataset is larger.",
     )
     if uploaded_file is not None:
         st.success(f"Dataset ready: {uploaded_file.name} · {uploaded_file.size / (1024 * 1024):.1f} MB")

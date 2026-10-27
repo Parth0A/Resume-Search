@@ -200,7 +200,17 @@ def _main() -> None:
     with st.form("search_form", clear_on_submit=False):
         role_col, exp_col, limit_col = st.columns([2, 1, 1])
         with role_col:
-            job_title = st.text_input("Job title or role *", placeholder="e.g. Software Engineer")
+            job_title = st.selectbox(
+                "Choose a job role *",
+                [
+                    "Software Engineer", "Python Developer", "Java Developer",
+                    "Frontend Developer", "Backend Developer", "Full Stack Developer",
+                    "Data Analyst", "Data Scientist", "Machine Learning Engineer",
+                    "AI Engineer", "DevOps Engineer", "Cybersecurity Analyst",
+                    "Web Developer", "Mobile App Developer", "UI / UX Designer",
+                    "QA / Test Engineer", "Other / custom role",
+                ],
+            )
         with exp_col:
             min_experience = st.selectbox(
                 "Minimum experience",

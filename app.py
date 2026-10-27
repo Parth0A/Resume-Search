@@ -168,7 +168,15 @@ def _main() -> None:
         .brand-icon { display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:12px; background:#fff; color:var(--rs-navy) !important; font-size:1.25rem; }
         .brand-accent { color:#9eb8ff; }
         .side-note { border:1px solid #344766; background:#152744; border-radius:14px; padding:13px; color:#dbe5ff; font-size:.83rem; line-height:1.55; }
-        .profile-avatar { display:flex; align-items:center; justify-content:center; width:76px; height:76px; margin:4px auto 16px; border-radius:24px; border:1px solid #536b96; background:linear-gradient(145deg,#f8fbff,#dce8ff); color:#142b59; font-size:2.2rem; font-weight:850; box-shadow:0 10px 25px rgba(0,0,0,.15); }
+        .profile-card { text-align:center; padding:16px 10px 14px; border:1.5px solid #536b96; border-radius:18px; background:rgba(255,255,255,.035); margin:8px 0 12px; }
+        .profile-card-label,.avatar-picker-label { color:#93a6ca; font-size:.62rem; font-weight:800; letter-spacing:.16em; text-align:center; }
+        .profile-avatar { display:flex; align-items:center; justify-content:center; width:68px; height:68px; margin:12px auto 10px; border-radius:22px; border:1.5px solid #829ac2; background:linear-gradient(145deg,#f8fbff,#dce8ff); color:#142b59; font-size:2rem; font-weight:850; box-shadow:0 8px 20px rgba(0,0,0,.15); }
+        .profile-name { color:#fff; font-size:1rem; font-weight:800; }
+        .profile-email { color:#c5d2ec; font-size:.76rem; overflow-wrap:anywhere; margin-top:3px; }
+        .profile-caption { color:#93a6ca; font-size:.7rem; margin-top:9px; }
+        .avatar-picker-label { margin:12px 0 6px; }
+        [data-testid="stSidebar"] div.stButton > button { min-height:2.35rem; padding:.2rem; font-size:1.05rem; border-radius:10px !important; }
+        [data-testid="stSidebar"] div[data-testid="stExpander"] { background:transparent !important; border-color:#536b96 !important; }
         .sidebar-footer { color:#93a6ca; font-size:.62rem; font-weight:800; letter-spacing:.16em; padding-top:12px; }
         .sidebar-footer span { color:#6d8fd5; padding:0 4px; }
         .about-hero { padding:2.3rem 2.4rem; border:1.5px solid #18396f; border-radius:24px; background:linear-gradient(135deg,#fff 0%,#f4f8ff 100%); margin-bottom:1.8rem; }
@@ -326,33 +334,39 @@ def _main() -> None:
             '<div class="brand-mark"><span class="brand-icon">⌕</span><span>Resume <span class="brand-accent">Search</span></span></div>',
             unsafe_allow_html=True,
         )
-        st.markdown("### Your profile")
-        avatar_options = {
-            "Navy diamond": "◆",
-            "Blue sparkle": "✦",
-            "Orbit": "◉",
-            "Code brackets": "‹ ›",
-            "Monogram P": "P",
-            "Compass": "✧",
-            "Pixel star": "✷",
-            "Circle wave": "◌",
-        }
-        current_avatar_label = next((label for label, glyph in avatar_options.items() if glyph == st.session_state["rs_avatar"]), "Navy diamond")
-        avatar_label = st.selectbox(
-            "Profile icon",
-            options=list(avatar_options.keys()),
-            index=list(avatar_options.keys()).index(current_avatar_label),
-            key="rs_avatar_picker",
-            label_visibility="collapsed",
-        )
-        st.session_state["rs_avatar"] = avatar_options[avatar_label]
+        avatar_options = [
+            ("Diamond", "◆"), ("Spark", "✦"), ("Orbit", "◉"), ("Code", "‹ ›"),
+            ("Monogram", "P"), ("Compass", "✧"), ("Pixel", "✷"), ("Wave", "◌"),
+        ]
+        if st.session_state["rs_avatar"] not in [glyph for _, glyph in avatar_options]:
+            st.session_state["rs_avatar"] = "◆"
         st.markdown(
-            f'<div class="profile-avatar">{st.session_state["rs_avatar"]}</div>',
+            f"""
+            <div class="profile-card">
+              <div class="profile-card-label">YOUR PROFILE</div>
+              <div class="profile-avatar">{st.session_state["rs_avatar"]}</div>
+              <div class="profile-name">{st.session_state["rs_profile_name"] or "Your name"}</div>
+              <div class="profile-email">{st.session_state["rs_profile_email"] or "Add your email"}</div>
+              <div class="profile-caption">Personalize your workspace</div>
+            </div>
+            """,
             unsafe_allow_html=True,
         )
-        st.text_input("Display name", key="rs_profile_name", placeholder="Your name")
-        st.text_input("Email", key="rs_profile_email", placeholder="you@example.com")
-        st.caption("Profile details are kept for this browser session.")
+        st.markdown('<div class="avatar-picker-label">CHOOSE AN ICON</div>', unsafe_allow_html=True)
+        avatar_cols = st.columns(4)
+        for index, (avatar_name, glyph) in enumerate(avatar_options):
+            with avatar_cols[index % 4]:
+                if st.button(
+                    glyph, key=f"rs_avatar_choice_{index}", help=avatar_name,
+                    use_container_width=True,
+                    type="primary" if st.session_state["rs_avatar"] == glyph else "secondary",
+                ):
+                    st.session_state["rs_avatar"] = glyph
+                    st.rerun()
+        with st.expander("Edit profile", expanded=False):
+            st.text_input("Display name", key="rs_profile_name", placeholder="Your name")
+            st.text_input("Email", key="rs_profile_email", placeholder="you@example.com")
+            st.caption("Profile details are kept for this browser session.")
         st.markdown("---")
         st.markdown("### Workspace")
         if st.button("⌂   Home", use_container_width=True, type="primary" if st.session_state["rs_page"] == "Home" else "secondary"):

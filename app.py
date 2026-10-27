@@ -237,6 +237,29 @@ def _main() -> None:
         .small-note { color:#66758e; font-size:.93rem; }
         .footer-note { color:#7b869b; text-align:center; font-size:.82rem; padding-top:1.8rem; }
         @media(max-width:800px) { .main .block-container { padding:1rem .8rem 2rem; } .hero { padding:1.4rem; border-radius:16px; } .candidate-card { padding:1rem; } .score-badge { padding:6px 8px; } }
+        /* Olive-green feedback palette; avoid red alert accents */
+        :root {
+          --rs-olive: #6b762b;
+          --rs-olive-dark: #50591f;
+          --rs-olive-light: #f1f3e5;
+        }
+        div[data-testid="stAlert"] {
+          border-color: var(--rs-olive) !important;
+        }
+        div[data-testid="stAlert"] [data-testid="stMarkdownContainer"],
+        div[data-testid="stAlert"] svg,
+        div[data-testid="stAlert"] svg * {
+          color: var(--rs-olive-dark) !important;
+          fill: var(--rs-olive) !important;
+        }
+        div[data-testid="stAlert"][kind="error"] {
+          background: var(--rs-olive-light) !important;
+          border-color: var(--rs-olive) !important;
+        }
+        div[data-testid="stAlert"][kind="error"] * {
+          color: var(--rs-olive-dark) !important;
+          border-color: var(--rs-olive) !important;
+        }
         </style>
         """,
         unsafe_allow_html=True,
@@ -352,17 +375,29 @@ def _main() -> None:
             """,
             unsafe_allow_html=True,
         )
-        st.markdown('<div class="avatar-picker-label">CHOOSE AN ICON</div>', unsafe_allow_html=True)
-        avatar_cols = st.columns(4)
-        for index, (avatar_name, glyph) in enumerate(avatar_options):
-            with avatar_cols[index % 4]:
-                if st.button(
-                    glyph, key=f"rs_avatar_choice_{index}", help=avatar_name,
-                    use_container_width=True,
-                    type="primary" if st.session_state["rs_avatar"] == glyph else "secondary",
-                ):
-                    st.session_state["rs_avatar"] = glyph
-                    st.rerun()
+        if st.button("✦  Change icon", key="rs_change_avatar", use_container_width=True):
+            st.session_state["rs_show_avatar_picker"] = not st.session_state.get(
+                "rs_show_avatar_picker", False
+            )
+
+        if st.session_state.get("rs_show_avatar_picker", False):
+            st.markdown(
+                '<div class="avatar-picker-label">CHOOSE YOUR ICON</div>',
+                unsafe_allow_html=True,
+            )
+            avatar_cols = st.columns(4)
+            for index, (avatar_name, glyph) in enumerate(avatar_options):
+                with avatar_cols[index % 4]:
+                    if st.button(
+                        glyph,
+                        key=f"rs_avatar_choice_{index}",
+                        help=avatar_name,
+                        use_container_width=True,
+                        type="primary" if st.session_state["rs_avatar"] == glyph else "secondary",
+                    ):
+                        st.session_state["rs_avatar"] = glyph
+                        st.session_state["rs_show_avatar_picker"] = False
+                        st.rerun()
         with st.expander("Edit profile", expanded=False):
             st.text_input("Display name", key="rs_profile_name", placeholder="Your name")
             st.text_input("Email", key="rs_profile_email", placeholder="you@example.com")

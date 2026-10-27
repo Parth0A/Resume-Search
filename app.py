@@ -238,8 +238,86 @@ def _main() -> None:
         .hero-kicker { color: #bdcaff; font-size: .76rem; font-weight: 750; letter-spacing: .13em; text-transform: uppercase; }
         .hero h1 { color: white; font-size: clamp(2rem, 4vw, 2.8rem); line-height: 1.12; letter-spacing: -.04em; margin: .45rem 0 .65rem; }
         .hero p { color: #e0e8ff; font-size: 1rem; line-height: 1.6; max-width: 730px; margin: 0; }
-        div[data-testid="stFileUploader"] { background: white; border: 1px solid #dfe6f3; border-radius: 16px; padding: .8rem; }
-        div[data-testid="stForm"] { background: white; border: 1px solid #dfe6f3; border-radius: 16px; padding: 1.2rem 1.3rem 1rem; box-shadow: 0 5px 18px rgba(22,35,70,.04); }
+        /* Final override: keep search/upload panels transparent with navy outlines. */
+        div[data-testid="stFileUploader"],
+        div[data-testid="stForm"],
+        div[data-testid="stMetric"],
+        div[data-testid="stExpander"],
+        div[data-testid="stVerticalBlockBorderWrapper"] {
+            background: transparent !important;
+            border: 1.5px solid #18396f !important;
+            border-radius: 18px !important;
+            box-shadow: none !important;
+        }
+        div[data-testid="stFileUploader"] section {
+            background: transparent !important;
+            border: 1.5px dashed #18396f !important;
+            border-radius: 14px !important;
+        }
+        div[data-testid="stTextInput"] input,
+        div[data-testid="stNumberInput"] input,
+        div[data-testid="stSelectbox"] [data-baseweb="select"] > div {
+            background: transparent !important;
+            color: var(--rs-text) !important;
+            border: 1.5px solid #18396f !important;
+            border-radius: 12px !important;
+        }
+        div[data-testid="stMultiSelect"] [data-baseweb="select"] > div {
+            background: #edf6ff !important;
+            color: #172642 !important;
+            border: 1.5px solid #18396f !important;
+            border-radius: 13px !important;
+        }
+        div[data-testid="stMultiSelect"] [data-baseweb="tag"] {
+            background: #142b59 !important;
+            border: 1px solid #10234b !important;
+            border-radius: 999px !important;
+        }
+        div[data-testid="stMultiSelect"] [data-baseweb="tag"] *,
+        div[data-testid="stMultiSelect"] [data-baseweb="tag"] span {
+            color: #ffffff !important;
+            fill: #ffffff !important;
+        }
+        div[data-testid="stFileUploader"] button,
+        div.stButton > button,
+        div.stFormSubmitButton > button,
+        div.stDownloadButton > button {
+            border: 1.5px solid #18396f !important;
+            border-radius: 12px !important;
+            box-shadow: none !important;
+        }
+        /* Streamlit versions expose theme on different ancestor elements. */
+        html[data-theme="dark"] .stApp,
+        [data-testid="stAppViewContainer"][data-theme="dark"] .stApp,
+        .stApp[data-theme="dark"] {
+            background: #05070b !important;
+            color: #f5f7fb !important;
+        }
+        html[data-theme="dark"] div[data-testid="stFileUploader"],
+        html[data-theme="dark"] div[data-testid="stForm"],
+        html[data-theme="dark"] div[data-testid="stMetric"],
+        html[data-theme="dark"] div[data-testid="stExpander"],
+        html[data-theme="dark"] div[data-testid="stVerticalBlockBorderWrapper"],
+        [data-testid="stAppViewContainer"][data-theme="dark"] div[data-testid="stFileUploader"],
+        [data-testid="stAppViewContainer"][data-theme="dark"] div[data-testid="stForm"],
+        [data-testid="stAppViewContainer"][data-theme="dark"] div[data-testid="stMetric"],
+        [data-testid="stAppViewContainer"][data-theme="dark"] div[data-testid="stExpander"] {
+            background: #ffffff !important;
+            color: #172642 !important;
+            border-color: #18396f !important;
+        }
+        html[data-theme="dark"] div[data-testid="stTextInput"] input,
+        html[data-theme="dark"] div[data-testid="stNumberInput"] input,
+        html[data-theme="dark"] div[data-testid="stSelectbox"] [data-baseweb="select"] > div {
+            background: #ffffff !important;
+            color: #172642 !important;
+            border-color: #18396f !important;
+        }
+        html[data-theme="dark"] div[data-testid="stMultiSelect"] [data-baseweb="select"] > div {
+            background: #edf6ff !important;
+            color: #172642 !important;
+            border-color: #18396f !important;
+        }
         .small-note { color: #68758d; font-size: .92rem; }
         .footer-note { color: #7b869b; text-align: center; font-size: .82rem; padding-top: 1.8rem; }
         @media (max-width: 700px) {

@@ -220,7 +220,24 @@ def _main() -> None:
             )
         with limit_col:
             results_limit = st.selectbox("Candidates to show", options=[5, 10, 25], index=1)
-        skills_text = st.text_input("Required skills", placeholder="Python, SQL, Git")
+        skill_options = [
+            "Python", "Java", "JavaScript", "TypeScript", "C", "C++", "C#",
+            "HTML", "CSS", "React", "Angular", "Node.js", "Django", "Flask",
+            "SQL", "MySQL", "PostgreSQL", "MongoDB", "Excel", "Power BI",
+            "Pandas", "NumPy", "Machine Learning", "Deep Learning", "AI",
+            "TensorFlow", "PyTorch", "Git", "GitHub", "Docker", "AWS",
+            "Azure", "Linux", "Cybersecurity", "Networking", "REST API",
+            "Figma", "UI/UX", "Selenium", "Testing", "Communication",
+        ]
+        selected_skills = st.multiselect(
+            "Choose skills / programming languages (optional)",
+            options=skill_options,
+            placeholder="Select one or more skills",
+        )
+        custom_skills_text = st.text_input(
+            "Other skills (optional)",
+            placeholder="Add skills not listed, separated by commas",
+        )
         submitted = st.form_submit_button("Search resumes", type="primary", use_container_width=True)
 
     st.caption("* Required field. Search scores measure text relevance and do not make hiring decisions.")
@@ -233,7 +250,8 @@ def _main() -> None:
             st.error("Enter a job title or role to start the search.")
             return
         try:
-            skills = _parse_skills(skills_text)
+            extra_skills = _parse_skills(custom_skills_text)
+            skills = list(dict.fromkeys(selected_skills + extra_skills))
             experience_value: int | None = None
             if min_experience != "Any experience":
                 experience_value = int(min_experience.split()[0])

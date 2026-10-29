@@ -16,7 +16,12 @@ from google.genai import types
 load_dotenv()
 
 # Use a fast Flash model to keep latency and token usage modest.
-DEFAULT_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
+_configured_model = os.getenv("GEMINI_MODEL", "").strip()
+# Upgrade the retired default even when an older .env still sets it explicitly.
+if _configured_model in {"gemini-2.5-flash", "models/gemini-2.5-flash"}:
+    DEFAULT_MODEL = "gemini-3.8-flash"
+else:
+    DEFAULT_MODEL = _configured_model or "gemini-3.8-flash"
 MAX_RESUME_CHARS = 12_000
 MAX_JOB_DESCRIPTION_CHARS = 8_000
 

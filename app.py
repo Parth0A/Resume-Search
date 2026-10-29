@@ -549,6 +549,9 @@ def _main() -> None:
     dataset_name = st.session_state.get("resume_dataset_name") or "uploaded_resumes.csv"
 
     if page == "Home":
+        home_logo_path = Path(__file__).parent / "assets" / "resume-search-logo.png"
+        if home_logo_path.exists():
+            st.image(str(home_logo_path), width=112)
         st.markdown("""<div class="hero"><div class="hero-kicker">Candidate discovery workspace</div><h1>Find the right talent,<br>faster.</h1><p>Use Gemini AI, upload your dataset, or browse your available resumes.</p></div>""", unsafe_allow_html=True)
         st.markdown('<div class="small-note">Choose where you want to start.</div>', unsafe_allow_html=True)
         with st.container(key="home_cards"):
@@ -803,6 +806,9 @@ def _main() -> None:
 
 
     elif page == "Edit Profile":
+        profile_logo_path = Path(__file__).parent / "assets" / "resume-search-logo.png"
+        if profile_logo_path.exists():
+            st.image(str(profile_logo_path), width=112)
         st.markdown("## Edit Profile")
         st.caption("Display preferences apply to this browser session; the account database is unchanged.")
         st.text_input("Account email", value=st.session_state.get("resume_search_email", ""), disabled=True)

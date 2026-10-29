@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import io
+from pathlib import Path
 import streamlit as st
 
 from backend import _prepare_export_data, load_resumes, search_resumes
@@ -102,7 +103,7 @@ def _render_results(results: dict) -> None:
 def _main() -> None:
     st.set_page_config(
         page_title="Resume Search",
-        page_icon="🔎",
+        page_icon=str(Path(__file__).parent / "assets" / "resume-search-logo.png") if (Path(__file__).parent / "assets" / "resume-search-logo.png").exists() else "📄",
         layout="wide",
         initial_sidebar_state="expanded",
     )
@@ -431,7 +432,7 @@ def _main() -> None:
             .main .block-container { max-width: 1240px; padding-top: 2rem; padding-bottom: 1.5rem; }
             [data-testid="stSidebar"] { display: none; }
             .login-brand-panel { min-height: 590px; padding: 2.5rem 2rem; border-radius: 24px; background: linear-gradient(145deg,#101b31 0%,#243c75 62%,#526fe2 100%); color: white; display:flex; flex-direction:column; justify-content:center; }
-            .login-logo { display:inline-flex; align-items:center; justify-content:center; width:54px; height:54px; border-radius:16px; background:linear-gradient(135deg,#4d6bff,#8c74ff); color:#fff; font-size:1.65rem; font-weight:800; margin-bottom:1.7rem; }
+            .login-logo { display:none; }
             .login-eyebrow { color:#c3d0ff; text-transform:uppercase; letter-spacing:.15em; font-weight:800; font-size:.75rem; }
             .login-title { font-size:clamp(2.4rem,4vw,3.8rem); line-height:1.05; letter-spacing:-.05em; color:#fff; font-weight:850; margin:.7rem 0 1rem; }
             .login-copy { color:#e0e8ff; font-size:1.03rem; line-height:1.75; }
@@ -448,10 +449,13 @@ def _main() -> None:
         )
         brand_col, form_col = st.columns([1, 1], gap="large", vertical_alignment="center")
         with brand_col:
+            login_logo_path = Path(__file__).parent / "assets" / "resume-search-logo.png"
+            if login_logo_path.exists():
+                st.image(str(login_logo_path), width=150)
             st.markdown(
                 """
                 <div class="login-brand-panel">
-                  <div class="login-logo">⌕</div>
+                  <div class="login-logo">Resume Search</div>
                   <div class="login-eyebrow">Smarter candidate discovery</div>
                   <div class="login-title">RESUME<br>SEARCH</div>
                   <p class="login-copy">Find talent. See the fit. Search resumes, compare relevant skills, and build a shortlist with more clarity.</p>
@@ -514,7 +518,10 @@ def _main() -> None:
         st.session_state["resume_search_icon"] = "⌕"
 
     with st.sidebar:
-        st.markdown(f'<div class="brand-mark"><span class="brand-icon">{st.session_state["resume_search_icon"]}</span><span>Resume <span class="brand-accent">Search</span></span></div>', unsafe_allow_html=True)
+        logo_path = Path(__file__).parent / "assets" / "resume-search-logo.png"
+        if logo_path.exists():
+            st.image(str(logo_path), width=112)
+        st.markdown('<div class="brand-mark"><span>Resume <span class="brand-accent">Search</span></span></div>', unsafe_allow_html=True)
         st.caption(f"Signed in as {role}")
         st.markdown("### Workspace")
         nav_items = [("Home", "⌂"), ("Gemini AI", "✦"), ("Upload Dataset", "⇧"), ("See Resumes", "▤")]
@@ -814,6 +821,9 @@ def _main() -> None:
             st.success("Workspace icon updated for this session.")
 
     elif page == "About This Project":
+        about_logo_path = Path(__file__).parent / "assets" / "resume-search-logo.png"
+        if about_logo_path.exists():
+            st.image(str(about_logo_path), width=150)
         st.markdown(
             """
             <section class="about-hero">

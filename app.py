@@ -4,10 +4,32 @@ from __future__ import annotations
 
 import io
 from pathlib import Path
+from urllib.request import Request, urlopen
+
+import pandas as pd
 import streamlit as st
 
 from backend import _prepare_export_data, load_resumes, search_resumes
 from ai_features import GeminiConfigurationError, analyze_resume, analyze_skill_gap, generate_job_description
+
+
+DEMO_DATASET_URL = "https://huggingface.co/datasets/mithinsagar/exai-resumeintel-data/resolve/main/clean_resume_data.csv?download=true"
+
+
+@st.cache_data(show_spinner=False)
+def _download_demo_dataset() -> bytes:
+    """Download and normalize the public demo resume dataset."""
+    request = Request(DEMO_DATASET_URL, headers={"User-Agent": "Resume-Search-Demo/1.0"})
+    with urlopen(request, timeout=45) as response:
+        raw_csv = response.read()
+
+    dataframe = pd.read_csv(io.BytesIO(raw_csv))
+    supported_columns = {"Resume_str", "Resume", "ResumeText", "Text", "Content"}
+    if not supported_columns.intersection(dataframe.columns) and "Feature" in dataframe.columns:
+        dataframe = dataframe.rename(columns={"Feature": "Resume_str"})
+    if not supported_columns.intersection(dataframe.columns):
+        raise ValueError("The demo CSV does not contain a supported resume-text column.")
+    return dataframe.to_csv(index=False).encode("utf-8")
 
 
 def _parse_skills(skills_text: str) -> list:
@@ -575,7 +597,19 @@ def _main() -> None:
 
     elif page == "Upload Dataset":
         st.markdown("## Upload Dataset")
-        st.caption("Upload a CSV file containing resume text. The dataset stays in this browser session.")
+        st.caption("Load the demo dataset automatically or upload your own resume CSV.")
+        if st.button("Load Demo Dataset", key="load_demo_dataset", type="primary"):
+            try:
+                with st.spinner("Downloading and preparing the demo dataset..."):
+                    demo_bytes = _download_demo_dataset()
+                    load_resumes(demo_bytes, "clean_resume_data.csv")
+                st.session_state["resume_dataset_bytes"] = demo_bytes
+                st.session_state["resume_dataset_name"] = "clean_resume_data.csv"
+                st.success("Demo dataset loaded successfully.")
+                st.rerun()
+            except Exception as error:
+                st.error(f"Could not load the demo dataset: {error}")
+        st.caption("Or upload your own CSV file below.")
         uploaded_file = st.file_uploader("Choose a resume CSV file", type=["csv"], max_upload_size=1024, help="The file should contain a resume-text column; Category is optional.", key="resume_dataset_uploader")
         if uploaded_file is not None:
             try:

@@ -483,10 +483,7 @@ def _main() -> None:
         )
         st.caption(f"Signed in as {role}")
         st.markdown("### Workspace")
-        nav_items = [
-            ("Home", "⌂"),
-            ("Gemini AI", "✦"),
-        ]
+        nav_items = [("Home", "⌂"), ("Gemini AI", "✦")]
         if role != "Job seeker":
             nav_items.extend([("Upload Dataset", "⇧"), ("See Resumes", "▤"), ("Search Resume", "⌕")])
         for page_name, page_icon in nav_items:
@@ -535,25 +532,15 @@ def _main() -> None:
                         st.markdown(f'<div class="home-card-icon">{card_icon}</div><h2 class="home-card-title">{card_title}</h2><p class="home-card-copy">{description}</p>', unsafe_allow_html=True)
                         st.write("")
                         if st.button(button_label, key=f"home_action_{card_title}", use_container_width=True):
-                            if role == "Job seeker" and card_title != "Gemini AI":
-                                st.info("Dataset search is available in the Recruiter workspace.")
-                            else:
-                                st.session_state["resume_search_page"] = card_title
-                                st.rerun()
+                            st.session_state["resume_search_page"] = card_title
+                            st.rerun()
 
     elif page == "Upload Dataset":
         st.markdown("## Upload Dataset")
         st.caption("Upload a CSV file containing resume text. The dataset stays in this browser session.")
-        uploaded_file = st.file_uploader(
-            "Choose a resume CSV file",
-            type=["csv"],
-            max_upload_size=1024,
-            help="The file should contain a resume-text column; Category is optional.",
-            key="resume_dataset_uploader",
-        )
+        uploaded_file = st.file_uploader("Choose a resume CSV file", type=["csv"], max_upload_size=1024, help="The file should contain a resume-text column; Category is optional.", key="resume_dataset_uploader")
         if uploaded_file is not None:
             try:
-                # Validate before making the dataset available to other pages.
                 load_resumes(uploaded_file.getvalue(), uploaded_file.name)
                 st.session_state["resume_dataset_bytes"] = uploaded_file.getvalue()
                 st.session_state["resume_dataset_name"] = uploaded_file.name
@@ -606,88 +593,88 @@ def _main() -> None:
                 st.session_state["resume_search_page"] = "Upload Dataset"
                 st.rerun()
         else:
-            st.markdown("## 2. Search resumes")
-            with st.form("search_form", clear_on_submit=False):
-                role_col, exp_col, limit_col = st.columns([2, 1, 1])
-                with role_col:
-                    selected_role = st.selectbox(
-                        "Choose a job role *",
-                        [
-                            "Software Engineer", "Python Developer", "Java Developer",
-                            "Frontend Developer", "Backend Developer", "Full Stack Developer",
-                            "Data Analyst", "Data Scientist", "Machine Learning Engineer",
-                            "AI Engineer", "DevOps Engineer", "Cybersecurity Analyst",
-                            "Web Developer", "Mobile App Developer", "UI / UX Designer",
-                            "QA / Test Engineer", "Other / custom role",
-                        ],
-                    )
-                    if selected_role == "Other / custom role":
-                        job_title = st.text_input("Enter your job role *", placeholder="e.g. Embedded Systems Engineer")
-                    else:
-                        job_title = selected_role
-                with exp_col:
-                    min_experience = st.selectbox(
-                        "Minimum experience",
-                        options=["Any experience", "1 year", "2 years", "3 years", "5 years", "7 years", "10 years"],
-                        index=0,
-                        help="Unknown experience is excluded when a minimum is selected.",
-                    )
-                with limit_col:
-                    results_limit = st.selectbox("Candidates to show", options=[5, 10, 25], index=1)
-                skill_options = [
-                    "Python", "Java", "JavaScript", "TypeScript", "C", "C++", "C#",
-                    "HTML", "CSS", "React", "Angular", "Node.js", "Django", "Flask",
-                    "SQL", "MySQL", "PostgreSQL", "MongoDB", "Excel", "Power BI",
-                    "Pandas", "NumPy", "Machine Learning", "Deep Learning", "AI",
-                    "TensorFlow", "PyTorch", "Git", "GitHub", "Docker", "AWS",
-                    "Azure", "Linux", "Cybersecurity", "Networking", "REST API",
-                    "Figma", "UI/UX", "Selenium", "Testing", "Communication",
-                ]
-                selected_skills = st.multiselect(
-                    "Choose skills / programming languages (optional)",
-                    options=skill_options,
-                    placeholder="Select one or more skills",
+        st.markdown("## 2. Search resumes")
+        with st.form("search_form", clear_on_submit=False):
+            role_col, exp_col, limit_col = st.columns([2, 1, 1])
+            with role_col:
+                selected_role = st.selectbox(
+                    "Choose a job role *",
+                    [
+                        "Software Engineer", "Python Developer", "Java Developer",
+                        "Frontend Developer", "Backend Developer", "Full Stack Developer",
+                        "Data Analyst", "Data Scientist", "Machine Learning Engineer",
+                        "AI Engineer", "DevOps Engineer", "Cybersecurity Analyst",
+                        "Web Developer", "Mobile App Developer", "UI / UX Designer",
+                        "QA / Test Engineer", "Other / custom role",
+                    ],
                 )
-                custom_skills_text = st.text_input(
-                    "Other skills (optional)",
-                    placeholder="Add skills not listed, separated by commas",
+                if selected_role == "Other / custom role":
+                    job_title = st.text_input("Enter your job role *", placeholder="e.g. Embedded Systems Engineer")
+                else:
+                    job_title = selected_role
+            with exp_col:
+                min_experience = st.selectbox(
+                    "Minimum experience",
+                    options=["Any experience", "1 year", "2 years", "3 years", "5 years", "7 years", "10 years"],
+                    index=0,
+                    help="Unknown experience is excluded when a minimum is selected.",
                 )
-                submitted = st.form_submit_button("Search resumes", type="primary", use_container_width=True)
+            with limit_col:
+                results_limit = st.selectbox("Candidates to show", options=[5, 10, 25], index=1)
+            skill_options = [
+                "Python", "Java", "JavaScript", "TypeScript", "C", "C++", "C#",
+                "HTML", "CSS", "React", "Angular", "Node.js", "Django", "Flask",
+                "SQL", "MySQL", "PostgreSQL", "MongoDB", "Excel", "Power BI",
+                "Pandas", "NumPy", "Machine Learning", "Deep Learning", "AI",
+                "TensorFlow", "PyTorch", "Git", "GitHub", "Docker", "AWS",
+                "Azure", "Linux", "Cybersecurity", "Networking", "REST API",
+                "Figma", "UI/UX", "Selenium", "Testing", "Communication",
+            ]
+            selected_skills = st.multiselect(
+                "Choose skills / programming languages (optional)",
+                options=skill_options,
+                placeholder="Select one or more skills",
+            )
+            custom_skills_text = st.text_input(
+                "Other skills (optional)",
+                placeholder="Add skills not listed, separated by commas",
+            )
+            submitted = st.form_submit_button("Search resumes", type="primary", use_container_width=True)
 
-            st.caption("* Required field. Search scores measure text relevance and do not make hiring decisions.")
+        st.caption("* Required field. Search scores measure text relevance and do not make hiring decisions.")
 
-            if submitted:
-                if dataset_bytes is None:
-                    st.error("Please upload a resume CSV before searching.")
-                    return
-                if not job_title.strip():
-                    st.error("Enter a job title or role to start the search.")
-                    return
+        if submitted:
+            if dataset_bytes is None:
+                st.error("Please upload a resume CSV before searching.")
+                return
+            if not job_title.strip():
+                st.error("Enter a job title or role to start the search.")
+                return
+            try:
+                extra_skills = _parse_skills(custom_skills_text)
+                skills = list(dict.fromkeys(selected_skills + extra_skills))
+                experience_value: int | None = None
+                if min_experience != "Any experience":
+                    experience_value = int(min_experience.split()[0])
+            except (ValueError, TypeError) as error:
+                st.error(str(error) or "Please check your search criteria.")
+                return
+
+            with st.spinner("Reading resumes and ranking matches…"):
                 try:
-                    extra_skills = _parse_skills(custom_skills_text)
-                    skills = list(dict.fromkeys(selected_skills + extra_skills))
-                    experience_value: int | None = None
-                    if min_experience != "Any experience":
-                        experience_value = int(min_experience.split()[0])
-                except (ValueError, TypeError) as error:
-                    st.error(str(error) or "Please check your search criteria.")
-                    return
-
-                with st.spinner("Reading resumes and ranking matches…"):
-                    try:
-                        df = load_resumes(dataset_bytes, dataset_name)
-                        results = search_resumes(
-                            df=df,
-                            job_title=job_title.strip(),
-                            skills=skills,
-                            min_experience=experience_value,
-                            limit=int(results_limit),
-                        )
-                        _render_results(results)
-                    except ValueError as error:
-                        st.error(f"Could not complete the search: {error}")
-                    except Exception:
-                        st.error("Something went wrong while processing this dataset. Check the CSV and available memory, then try again.")
+                    df = load_resumes(dataset_bytes, dataset_name)
+                    results = search_resumes(
+                        df=df,
+                        job_title=job_title.strip(),
+                        skills=skills,
+                        min_experience=experience_value,
+                        limit=int(results_limit),
+                    )
+                    _render_results(results)
+                except ValueError as error:
+                    st.error(f"Could not complete the search: {error}")
+                except Exception:
+                    st.error("Something went wrong while processing this dataset. Check the CSV and available memory, then try again.")
 
 
 
@@ -715,77 +702,76 @@ def _main() -> None:
                 st.session_state["resume_search_page"] = "Upload Dataset"
                 st.rerun()
         else:
-            # Optional Gemini tools run only after an explicit button click.
-            st.markdown("---")
-            st.markdown("## 3. Gemini AI tools")
-            st.caption("Optional AI tools for recruiters and job seekers. Resume text is sent to Google Gemini only when you run an AI action.")
-            if dataset_bytes is not None:
-                try:
-                    ai_df = load_resumes(dataset_bytes, dataset_name)
-                    from backend import _find_resume_column
-                    resume_column = _find_resume_column(ai_df)
-                    candidate_index = st.selectbox("Select a resume for AI analysis", options=list(range(len(ai_df))), format_func=lambda idx: f"Candidate {idx + 1}", key="ai_candidate_index")
-                    ai_resume_text = str(ai_df.iloc[candidate_index][resume_column] or "")
-                    tab_profile, tab_gap, tab_jd = st.tabs(["Resume Intelligence", "Skill Gap Analyzer", "Job Description Generator"])
-                    with tab_profile:
-                        st.write("Extract a structured profile grounded in one resume.")
-                        if st.button("Analyze selected resume", key="ai_analyze_resume", type="primary"):
-                            with st.spinner("Analyzing one resume with Gemini…"):
-                                try:
-                                    st.session_state["ai_resume_profile"] = analyze_resume(ai_resume_text)
-                                except (GeminiConfigurationError, ValueError, RuntimeError) as error:
-                                    st.error(str(error))
-                                except Exception:
-                                    st.error("Gemini request failed. Check your API key, connection, and free-tier quota.")
-                        if "ai_resume_profile" in st.session_state:
-                            st.json(st.session_state["ai_resume_profile"])
-                    with tab_gap:
-                        gap_description = st.text_area("Paste the target job description", height=170, key="ai_gap_description")
-                        if st.button("Analyze skill gaps", key="ai_analyze_gap", type="primary"):
-                            with st.spinner("Comparing one resume with the job description…"):
-                                try:
-                                    st.session_state["ai_skill_gap"] = analyze_skill_gap(ai_resume_text, gap_description)
-                                except (GeminiConfigurationError, ValueError, RuntimeError) as error:
-                                    st.error(str(error))
-                                except Exception:
-                                    st.error("Gemini request failed. Check your API key, connection, and free-tier quota.")
-                        if "ai_skill_gap" in st.session_state:
-                            st.json(st.session_state["ai_skill_gap"])
-                    with tab_jd:
-                        jd_title = st.text_input("Job title", key="ai_jd_title", placeholder="e.g. Junior Python Developer")
-                        jd_skills = st.text_input("Required skills (comma-separated)", key="ai_jd_skills", placeholder="Python, SQL, Git")
-                        left, right = st.columns(2)
-                        with left:
-                            jd_level = st.selectbox("Experience level", ["Entry level", "Junior", "Mid-level", "Senior", "Internship"], key="ai_jd_level")
-                        with right:
-                            jd_type = st.selectbox("Employment type", ["Full-time", "Part-time", "Internship", "Contract", "Temporary"], key="ai_jd_type")
-                        jd_context = st.text_area("Additional context (optional)", key="ai_jd_context", height=90)
-                        if st.button("Generate job description", key="ai_generate_jd", type="primary"):
-                            with st.spinner("Drafting a job description with Gemini…"):
-                                try:
-                                    st.session_state["ai_job_description"] = generate_job_description(jd_title, [item.strip() for item in jd_skills.split(",") if item.strip()], jd_level, jd_type, jd_context)
-                                except (GeminiConfigurationError, ValueError, RuntimeError) as error:
-                                    st.error(str(error))
-                                except Exception:
-                                    st.error("Gemini request failed. Check your API key, connection, and free-tier quota.")
-                        if "ai_job_description" in st.session_state:
-                            import json
-                            jd_result = st.session_state["ai_job_description"]
-                            st.json(jd_result)
-                            st.download_button("Download job description (JSON)", data=json.dumps(jd_result, indent=2, ensure_ascii=False), file_name="generated_job_description.json", mime="application/json", key="ai_jd_download")
-                except ValueError as error:
-                    st.error(f"Could not prepare AI tools: {error}")
-                st.caption("AI output can be incorrect. Verify details, do not use it as the sole basis for hiring decisions, and upload resumes only when you have permission.")
-            else:
-                st.info("Upload a CSV above to enable the Gemini AI tools.")
+        # Optional Gemini tools run only after an explicit button click.
+        st.markdown("---")
+        st.markdown("## 3. Gemini AI tools")
+        st.caption("Optional AI tools for recruiters and job seekers. Resume text is sent to Google Gemini only when you run an AI action.")
+        if dataset_bytes is not None:
+            try:
+                ai_df = load_resumes(dataset_bytes, dataset_name)
+                from backend import _find_resume_column
+                resume_column = _find_resume_column(ai_df)
+                candidate_index = st.selectbox("Select a resume for AI analysis", options=list(range(len(ai_df))), format_func=lambda idx: f"Candidate {idx + 1}", key="ai_candidate_index")
+                ai_resume_text = str(ai_df.iloc[candidate_index][resume_column] or "")
+                tab_profile, tab_gap, tab_jd = st.tabs(["Resume Intelligence", "Skill Gap Analyzer", "Job Description Generator"])
+                with tab_profile:
+                    st.write("Extract a structured profile grounded in one resume.")
+                    if st.button("Analyze selected resume", key="ai_analyze_resume", type="primary"):
+                        with st.spinner("Analyzing one resume with Gemini…"):
+                            try:
+                                st.session_state["ai_resume_profile"] = analyze_resume(ai_resume_text)
+                            except (GeminiConfigurationError, ValueError, RuntimeError) as error:
+                                st.error(str(error))
+                            except Exception:
+                                st.error("Gemini request failed. Check your API key, connection, and free-tier quota.")
+                    if "ai_resume_profile" in st.session_state:
+                        st.json(st.session_state["ai_resume_profile"])
+                with tab_gap:
+                    gap_description = st.text_area("Paste the target job description", height=170, key="ai_gap_description")
+                    if st.button("Analyze skill gaps", key="ai_analyze_gap", type="primary"):
+                        with st.spinner("Comparing one resume with the job description…"):
+                            try:
+                                st.session_state["ai_skill_gap"] = analyze_skill_gap(ai_resume_text, gap_description)
+                            except (GeminiConfigurationError, ValueError, RuntimeError) as error:
+                                st.error(str(error))
+                            except Exception:
+                                st.error("Gemini request failed. Check your API key, connection, and free-tier quota.")
+                    if "ai_skill_gap" in st.session_state:
+                        st.json(st.session_state["ai_skill_gap"])
+                with tab_jd:
+                    jd_title = st.text_input("Job title", key="ai_jd_title", placeholder="e.g. Junior Python Developer")
+                    jd_skills = st.text_input("Required skills (comma-separated)", key="ai_jd_skills", placeholder="Python, SQL, Git")
+                    left, right = st.columns(2)
+                    with left:
+                        jd_level = st.selectbox("Experience level", ["Entry level", "Junior", "Mid-level", "Senior", "Internship"], key="ai_jd_level")
+                    with right:
+                        jd_type = st.selectbox("Employment type", ["Full-time", "Part-time", "Internship", "Contract", "Temporary"], key="ai_jd_type")
+                    jd_context = st.text_area("Additional context (optional)", key="ai_jd_context", height=90)
+                    if st.button("Generate job description", key="ai_generate_jd", type="primary"):
+                        with st.spinner("Drafting a job description with Gemini…"):
+                            try:
+                                st.session_state["ai_job_description"] = generate_job_description(jd_title, [item.strip() for item in jd_skills.split(",") if item.strip()], jd_level, jd_type, jd_context)
+                            except (GeminiConfigurationError, ValueError, RuntimeError) as error:
+                                st.error(str(error))
+                            except Exception:
+                                st.error("Gemini request failed. Check your API key, connection, and free-tier quota.")
+                    if "ai_job_description" in st.session_state:
+                        import json
+                        jd_result = st.session_state["ai_job_description"]
+                        st.json(jd_result)
+                        st.download_button("Download job description (JSON)", data=json.dumps(jd_result, indent=2, ensure_ascii=False), file_name="generated_job_description.json", mime="application/json", key="ai_jd_download")
+            except ValueError as error:
+                st.error(f"Could not prepare AI tools: {error}")
+            st.caption("AI output can be incorrect. Verify details, do not use it as the sole basis for hiring decisions, and upload resumes only when you have permission.")
+        else:
+            st.info("Upload a CSV above to enable the Gemini AI tools.")
 
 
 
     elif page == "Edit Profile":
         st.markdown("## Edit Profile")
         st.caption("These display preferences apply to this browser session; your existing account database is unchanged.")
-        current_email = st.session_state.get("resume_search_email", "")
-        st.text_input("Account email", value=current_email, disabled=True)
+        st.text_input("Account email", value=st.session_state.get("resume_search_email", ""), disabled=True)
         display_name = st.text_input("Display name", value=st.session_state.get("resume_search_display_name", ""), key="profile_display_name_input")
         if st.button("Save Profile", key="save_profile", type="primary"):
             st.session_state["resume_search_display_name"] = display_name.strip()

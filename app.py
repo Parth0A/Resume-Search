@@ -732,8 +732,8 @@ def _main() -> None:
                         st.session_state["job_seeker_gap_result"] = analyze_skill_gap(own_resume_text, target_job_text)
                     except (GeminiConfigurationError, ValueError, RuntimeError) as error:
                         st.error(str(error))
-                    except Exception:
-                        st.error("Gemini request failed. Check your API key, connection, and free-tier quota.")
+                    except Exception as error:
+                        st.error(f"Gemini request failed ({type(error).__name__}): {error}")
             if "job_seeker_gap_result" in st.session_state:
                 st.json(st.session_state["job_seeker_gap_result"])
             st.caption("AI output can be incorrect. Verify suggestions before acting on them.")
@@ -763,8 +763,8 @@ def _main() -> None:
                                     st.session_state["ai_resume_profile"] = analyze_resume(ai_resume_text)
                                 except (GeminiConfigurationError, ValueError, RuntimeError) as error:
                                     st.error(str(error))
-                                except Exception:
-                                    st.error("Gemini request failed. Check your API key, connection, and free-tier quota.")
+                                except Exception as error:
+                                    st.error(f"Gemini request failed ({type(error).__name__}): {error}")
                         if "ai_resume_profile" in st.session_state:
                             st.json(st.session_state["ai_resume_profile"])
                     with tab_gap:
@@ -775,8 +775,8 @@ def _main() -> None:
                                     st.session_state["ai_skill_gap"] = analyze_skill_gap(ai_resume_text, gap_description)
                                 except (GeminiConfigurationError, ValueError, RuntimeError) as error:
                                     st.error(str(error))
-                                except Exception:
-                                    st.error("Gemini request failed. Check your API key, connection, and free-tier quota.")
+                                except Exception as error:
+                                    st.error(f"Gemini request failed ({type(error).__name__}): {error}")
                         if "ai_skill_gap" in st.session_state:
                             st.json(st.session_state["ai_skill_gap"])
                     with tab_jd:
@@ -794,8 +794,8 @@ def _main() -> None:
                                     st.session_state["ai_job_description"] = generate_job_description(jd_title, [item.strip() for item in jd_skills.split(",") if item.strip()], jd_level, jd_type, jd_context)
                                 except (GeminiConfigurationError, ValueError, RuntimeError) as error:
                                     st.error(str(error))
-                                except Exception:
-                                    st.error("Gemini request failed. Check your API key, connection, and free-tier quota.")
+                                except Exception as error:
+                                    st.error(f"Gemini request failed ({type(error).__name__}): {error}")
                         if "ai_job_description" in st.session_state:
                             import json
                             jd_result = st.session_state["ai_job_description"]

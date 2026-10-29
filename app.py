@@ -103,7 +103,7 @@ def _render_results(results: dict) -> None:
 def _main() -> None:
     st.set_page_config(
         page_title="Resume Search",
-        page_icon=str(Path(__file__).parent / "assets" / "resume-search-logo.png") if (Path(__file__).parent / "assets" / "resume-search-logo.png").exists() else "📄",
+        page_icon=str(Path(__file__).parent / "assets" / "resume-search-logo.svg") if (Path(__file__).parent / "assets" / "resume-search-logo.svg").exists() else "📄",
         layout="wide",
         initial_sidebar_state="expanded",
     )
@@ -449,7 +449,7 @@ def _main() -> None:
         )
         brand_col, form_col = st.columns([1, 1], gap="large", vertical_alignment="center")
         with brand_col:
-            login_logo_path = Path(__file__).parent / "assets" / "resume-search-logo.png"
+            login_logo_path = Path(__file__).parent / "assets" / "resume-search-logo.svg"
             if login_logo_path.exists():
                 st.image(str(login_logo_path), width=150)
             st.markdown(
@@ -518,7 +518,7 @@ def _main() -> None:
         st.session_state["resume_search_icon"] = "⌕"
 
     with st.sidebar:
-        logo_path = Path(__file__).parent / "assets" / "resume-search-logo.png"
+        logo_path = Path(__file__).parent / "assets" / "resume-search-logo.svg"
         if logo_path.exists():
             st.image(str(logo_path), width=112)
         st.markdown('<div class="brand-mark"><span>Resume <span class="brand-accent">Search</span></span></div>', unsafe_allow_html=True)
@@ -549,7 +549,7 @@ def _main() -> None:
     dataset_name = st.session_state.get("resume_dataset_name") or "uploaded_resumes.csv"
 
     if page == "Home":
-        home_logo_path = Path(__file__).parent / "assets" / "resume-search-logo.png"
+        home_logo_path = Path(__file__).parent / "assets" / "resume-search-logo.svg"
         if home_logo_path.exists():
             st.image(str(home_logo_path), width=112)
         st.markdown("""<div class="hero"><div class="hero-kicker">Candidate discovery workspace</div><h1>Find the right talent,<br>faster.</h1><p>Use Gemini AI, upload your dataset, or browse your available resumes.</p></div>""", unsafe_allow_html=True)
@@ -806,7 +806,7 @@ def _main() -> None:
 
 
     elif page == "Edit Profile":
-        profile_logo_path = Path(__file__).parent / "assets" / "resume-search-logo.png"
+        profile_logo_path = Path(__file__).parent / "assets" / "resume-search-logo.svg"
         if profile_logo_path.exists():
             st.image(str(profile_logo_path), width=112)
         st.markdown("## Edit Profile")
@@ -827,7 +827,7 @@ def _main() -> None:
             st.success("Workspace icon updated for this session.")
 
     elif page == "About This Project":
-        about_logo_path = Path(__file__).parent / "assets" / "resume-search-logo.png"
+        about_logo_path = Path(__file__).parent / "assets" / "resume-search-logo.svg"
         if about_logo_path.exists():
             st.image(str(about_logo_path), width=150)
         st.markdown(

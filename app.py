@@ -327,6 +327,49 @@ def _main() -> None:
         }
         .small-note { color: #68758d; font-size: .92rem; }
         .footer-note { color: #7b869b; text-align: center; font-size: .82rem; padding-top: 1.8rem; }
+
+        .about-hero { position: relative; overflow: hidden; padding: 2rem 2.2rem 2.15rem; border-radius: 24px; color: #fff; background: radial-gradient(circle at 88% 12%, rgba(111,142,255,.32), transparent 30%), linear-gradient(135deg,#0c1830 0%,#142b59 58%,#3558a4 100%); box-shadow: 0 20px 48px rgba(20,43,89,.16); margin: .3rem 0 2.1rem; }
+        .about-topline { display:flex; align-items:center; gap:11px; color:#c8d6ff; font-size:.72rem; font-weight:800; letter-spacing:.16em; }
+        .about-monogram,.about-signoff-mark { display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; width:39px; height:39px; border:1px solid rgba(255,255,255,.32); border-radius:13px; background:rgba(255,255,255,.1); color:#fff; font-size:.85rem; font-weight:850; letter-spacing:-.02em; }
+        .about-status { margin-left:auto; border:1px solid rgba(219,229,255,.3); border-radius:999px; padding:7px 11px; letter-spacing:.1em; font-size:.64rem; }
+        .about-author { margin-top:1.65rem; color:#c7d5ff; font-size:.86rem; }
+        .about-name { margin:.12rem 0 .8rem; color:#fff !important; font-size:clamp(1.9rem,4vw,2.7rem); font-weight:850; letter-spacing:-.045em; line-height:1.12; }
+        .about-rule { width:58px; height:3px; border-radius:4px; background:linear-gradient(90deg,#8ea6ff,#d9e3ff); margin:1.1rem 0 1.35rem; }
+        .about-kicker { color:#b8caff; font-size:.7rem; font-weight:800; letter-spacing:.16em; }
+        .about-title { margin:.4rem 0 .7rem; color:#fff !important; font-size:clamp(2rem,4.5vw,3.3rem); letter-spacing:-.05em; font-weight:850; }
+        .about-lead { max-width:850px; color:#e2eaff !important; font-size:1rem; line-height:1.8; margin:0; }
+        .about-tags { display:flex; flex-wrap:wrap; gap:8px; margin-top:1.35rem; }
+        .about-tags span { padding:7px 11px; border:1px solid rgba(221,231,255,.28); border-radius:999px; color:#f2f5ff; background:rgba(255,255,255,.07); font-size:.76rem; }
+        .about-section-heading { display:flex; align-items:flex-start; gap:14px; margin:2rem 0 1rem; }
+        .about-section-heading > span { display:inline-flex; align-items:center; justify-content:center; min-width:37px; height:37px; border-radius:12px; background:#eaf0ff; border:1px solid #d5e0ff; color:#142b59; font-size:.76rem; font-weight:850; }
+        .about-section-heading h3 { margin:0 0 .2rem; color:#142b59; font-size:1.25rem; font-weight:820; letter-spacing:-.025em; }
+        .about-section-heading p { margin:0; color:#71809a; font-size:.88rem; }
+        .about-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+        .about-card { padding:1.25rem 1.3rem; border:1px solid #dce4f2; border-radius:18px; background:linear-gradient(145deg,#fff,#f8faff); box-shadow:0 8px 24px rgba(24,48,92,.045); }
+        .about-icon { display:flex; align-items:center; justify-content:center; width:42px; height:42px; border-radius:13px; background:#eaf0ff; color:#142b59; font-size:1.4rem; margin-bottom:.85rem; }
+        .about-card h4 { margin:0 0 .45rem; color:#142b59; font-size:1.02rem; font-weight:800; }
+        .about-card p,.about-capabilities p { margin:0; color:#62718b; font-size:.88rem; line-height:1.7; }
+        .about-workflow { padding:1.1rem 1.25rem; border:1px solid #dce4f2; border-radius:18px; background:#fff; }
+        .about-step { display:flex; gap:14px; padding:.85rem 0; }
+        .about-step + .about-step { border-top:1px solid #edf0f7; }
+        .about-step > span { display:flex; align-items:center; justify-content:center; width:36px; height:36px; flex-shrink:0; border-radius:12px; background:#142b59; color:#fff; font-size:.75rem; font-weight:800; }
+        .about-step strong,.about-capabilities strong { color:#172642; font-size:.94rem; }
+        .about-step p { margin:.22rem 0 0; color:#62718b; font-size:.86rem; line-height:1.7; }
+        .about-step code { color:#142b59; background:#edf3ff; padding:2px 5px; border-radius:5px; }
+        .about-capabilities { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 22px; padding:1rem 1.25rem; border:1px solid #dce4f2; border-radius:18px; background:#fff; }
+        .about-capabilities > div { padding:1rem 0; }
+        .about-capabilities > div:nth-child(n+3) { border-top:1px solid #edf0f7; }
+        .about-note { padding:1.2rem 1.35rem; border:1px solid #dce4f2; border-left:4px solid #526fe2; border-radius:16px; background:#fff; }
+        .about-note p { color:#62718b; font-size:.87rem; line-height:1.75; margin:0 0 .8rem; }
+        .about-note p:last-child { margin-bottom:0; }
+        .about-note strong { color:#172642; }
+        .about-signoff { display:flex; align-items:center; gap:12px; margin-top:2rem; padding-top:1.2rem; border-top:1px solid #dfe6f2; }
+        .about-signoff-mark { background:#142b59; border-color:#142b59; }
+        .about-signoff strong { color:#142b59; font-size:.92rem; }
+        .about-signoff p { color:#7b869b; font-size:.78rem; margin:.1rem 0 0; }
+        .about-signoff-line { flex:1; height:1px; margin-left:10px; background:linear-gradient(90deg,#d6deed,transparent); }
+        @media(max-width:700px) { .about-hero { padding:1.35rem 1.15rem 1.5rem; border-radius:18px; } .about-status { font-size:.56rem; padding:6px 8px; } .about-grid,.about-capabilities { grid-template-columns:1fr; } .about-capabilities > div:nth-child(n+2) { border-top:1px solid #edf0f7; } .about-card { padding:1.1rem; } .about-workflow { padding:.8rem 1rem; } .about-step { gap:10px; } }
+
         @media (max-width: 700px) {
             .main .block-container { padding: 1rem .8rem 2rem; }
             .hero { padding: 1.35rem 1.15rem; border-radius: 15px; }
@@ -771,10 +814,76 @@ def _main() -> None:
             st.success("Workspace icon updated for this session.")
 
     elif page == "About This Project":
-        st.markdown("## About This Project")
-        st.write("Resume Search helps users explore resume datasets, search for text-relevant candidates, review matching skills, and optionally use Gemini AI for resume insights.")
-        st.write("Search scores measure text similarity only. They are not hiring probabilities, and results should be reviewed by a person.")
-        st.write("Uploaded datasets and profile display preferences are kept in the current Streamlit session; they are not permanently saved by these interface changes.")
+        st.markdown(
+            """
+            <section class="about-hero">
+              <div class="about-topline"><span class="about-monogram">PA</span><span>PROJECT OVERVIEW</span><span class="about-status">FIELD PROJECT</span></div>
+              <div class="about-author">Created by</div>
+              <h1 class="about-name">Parth Andhale</h1>
+              <div class="about-rule"></div>
+              <div class="about-kicker">SMARTER CANDIDATE DISCOVERY</div>
+              <h2 class="about-title">Resume Search</h2>
+              <p class="about-lead">A resume exploration and candidate-matching workspace designed to help users search resume datasets, compare relevant skills, review ranked results, and access optional AI-assisted insights—all in one place.</p>
+              <div class="about-tags"><span>Resume discovery</span><span>Skill matching</span><span>Gemini AI tools</span></div>
+            </section>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        st.markdown('<div class="about-section-heading"><span>01</span><div><h3>What the app does</h3><p>From a resume dataset to a clearer shortlist.</p></div></div>', unsafe_allow_html=True)
+        st.markdown(
+            """
+            <div class="about-grid">
+              <article class="about-card"><div class="about-icon">⌕</div><h4>Search &amp; rank resumes</h4><p>Search an uploaded dataset using a job role and optional skills. Apply a minimum-experience filter and choose how many candidates to display.</p></article>
+              <article class="about-card"><div class="about-icon">▤</div><h4>Browse candidate records</h4><p>Explore the uploaded resumes, review available categories, inspect resume text, and move from browsing to searching the same dataset.</p></article>
+              <article class="about-card"><div class="about-icon">✦</div><h4>Gemini AI assistance</h4><p>When configured, Gemini-powered tools can summarize a resume into a structured profile, compare resume skills with a job description, and draft a job description.</p></article>
+              <article class="about-card"><div class="about-icon">⇩</div><h4>Review &amp; export results</h4><p>See ranked candidates, detected experience, requested skills found or not detected, text-relevance scores, and download ranked results as a CSV file.</p></article>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        st.markdown('<div class="about-section-heading"><span>02</span><div><h3>How it works</h3><p>A simple workflow for exploring resume data.</p></div></div>', unsafe_allow_html=True)
+        st.markdown(
+            """
+            <div class="about-workflow">
+              <div class="about-step"><span>01</span><div><strong>Upload a dataset</strong><p>Choose a CSV containing resume text. Supported text-column names include <code>Resume_str</code>, <code>Resume</code>, <code>ResumeText</code>, <code>Text</code>, and <code>Content</code>. A category column is optional.</p></div></div>
+              <div class="about-step"><span>02</span><div><strong>Set search criteria</strong><p>Choose a job role, optionally select relevant skills, set a minimum experience level, and select the number of results to show.</p></div></div>
+              <div class="about-step"><span>03</span><div><strong>Review the shortlist</strong><p>Compare relevance scores, detected experience, skill matches, and the underlying resume text. Export the ranked results when needed.</p></div></div>
+              <div class="about-step"><span>04</span><div><strong>Use AI tools when useful</strong><p>Open Gemini AI for resume-profile analysis, skill-gap comparison, or job-description drafting. AI output should always be checked.</p></div></div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        st.markdown('<div class="about-section-heading"><span>03</span><div><h3>Workspace &amp; capabilities</h3><p>The main tools available in Resume Search.</p></div></div>', unsafe_allow_html=True)
+        st.markdown(
+            """
+            <div class="about-capabilities">
+              <div><strong>Home</strong><p>Quick access to Gemini AI, Upload Dataset, and See Resumes.</p></div>
+              <div><strong>Upload Dataset</strong><p>Validate and load a resume CSV into the current Streamlit session.</p></div>
+              <div><strong>See Resumes</strong><p>Browse dataset records and inspect the text for an individual resume.</p></div>
+              <div><strong>Search Resume</strong><p>Recruiter workspace for role-based, skill-aware and experience-filtered candidate search.</p></div>
+              <div><strong>Edit Profile &amp; Change Icon</strong><p>Adjust the display name and workspace icon for the current session.</p></div>
+              <div><strong>Account access</strong><p>Create an account or sign in as a Recruiter or Job seeker using the app's local account database.</p></div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        st.markdown('<div class="about-section-heading"><span>04</span><div><h3>Important notes</h3><p>Clear expectations about data, AI, and scoring.</p></div></div>', unsafe_allow_html=True)
+        st.markdown(
+            """
+            <div class="about-note">
+              <p><strong>Relevance is not a hiring decision.</strong> Search scores represent text similarity to the search terms. They are not hiring probabilities, verified qualifications, or a measure of a person's overall ability.</p>
+              <p><strong>Human review matters.</strong> Read the original resume evidence and verify important details before making decisions. Gemini-generated output can be inaccurate and should not be the sole basis for hiring decisions.</p>
+              <p><strong>Session-based dataset and preferences.</strong> Uploaded resume data and display preferences are held in the current Streamlit session; these interface changes do not make them permanent. Upload only resume data you have permission to use.</p>
+              <p><strong>AI setup.</strong> Gemini features require valid API configuration and may be affected by connection or usage limits.</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.markdown('<div class="about-signoff"><span class="about-signoff-mark">PA</span><div><strong>Parth Andhale</strong><p>Resume Search · Project overview</p></div><span class="about-signoff-line"></span></div>', unsafe_allow_html=True)
 
     st.markdown('<div class="footer-note">Resume Search · Review resume evidence carefully. Automated relevance scores should support—not replace—human judgment.</div>', unsafe_allow_html=True)
 

@@ -679,69 +679,69 @@ def _main() -> None:
                 st.session_state["resume_search_page"] = "Upload Dataset"
                 st.rerun()
         else:
-        # Optional Gemini tools run only after an explicit button click.
-        st.markdown("---")
-        st.markdown("## 3. Gemini AI tools")
-        st.caption("Optional AI tools for recruiters and job seekers. Resume text is sent to Google Gemini only when you run an AI action.")
-        if dataset_bytes is not None:
-            try:
-                ai_df = load_resumes(dataset_bytes, dataset_name)
-                from backend import _find_resume_column
-                resume_column = _find_resume_column(ai_df)
-                candidate_index = st.selectbox("Select a resume for AI analysis", options=list(range(len(ai_df))), format_func=lambda idx: f"Candidate {idx + 1}", key="ai_candidate_index")
-                ai_resume_text = str(ai_df.iloc[candidate_index][resume_column] or "")
-                tab_profile, tab_gap, tab_jd = st.tabs(["Resume Intelligence", "Skill Gap Analyzer", "Job Description Generator"])
-                with tab_profile:
-                    st.write("Extract a structured profile grounded in one resume.")
-                    if st.button("Analyze selected resume", key="ai_analyze_resume", type="primary"):
-                        with st.spinner("Analyzing one resume with Gemini…"):
-                            try:
-                                st.session_state["ai_resume_profile"] = analyze_resume(ai_resume_text)
-                            except (GeminiConfigurationError, ValueError, RuntimeError) as error:
-                                st.error(str(error))
-                            except Exception:
-                                st.error("Gemini request failed. Check your API key, connection, and free-tier quota.")
-                    if "ai_resume_profile" in st.session_state:
-                        st.json(st.session_state["ai_resume_profile"])
-                with tab_gap:
-                    gap_description = st.text_area("Paste the target job description", height=170, key="ai_gap_description")
-                    if st.button("Analyze skill gaps", key="ai_analyze_gap", type="primary"):
-                        with st.spinner("Comparing one resume with the job description…"):
-                            try:
-                                st.session_state["ai_skill_gap"] = analyze_skill_gap(ai_resume_text, gap_description)
-                            except (GeminiConfigurationError, ValueError, RuntimeError) as error:
-                                st.error(str(error))
-                            except Exception:
-                                st.error("Gemini request failed. Check your API key, connection, and free-tier quota.")
-                    if "ai_skill_gap" in st.session_state:
-                        st.json(st.session_state["ai_skill_gap"])
-                with tab_jd:
-                    jd_title = st.text_input("Job title", key="ai_jd_title", placeholder="e.g. Junior Python Developer")
-                    jd_skills = st.text_input("Required skills (comma-separated)", key="ai_jd_skills", placeholder="Python, SQL, Git")
-                    left, right = st.columns(2)
-                    with left:
-                        jd_level = st.selectbox("Experience level", ["Entry level", "Junior", "Mid-level", "Senior", "Internship"], key="ai_jd_level")
-                    with right:
-                        jd_type = st.selectbox("Employment type", ["Full-time", "Part-time", "Internship", "Contract", "Temporary"], key="ai_jd_type")
-                    jd_context = st.text_area("Additional context (optional)", key="ai_jd_context", height=90)
-                    if st.button("Generate job description", key="ai_generate_jd", type="primary"):
-                        with st.spinner("Drafting a job description with Gemini…"):
-                            try:
-                                st.session_state["ai_job_description"] = generate_job_description(jd_title, [item.strip() for item in jd_skills.split(",") if item.strip()], jd_level, jd_type, jd_context)
-                            except (GeminiConfigurationError, ValueError, RuntimeError) as error:
-                                st.error(str(error))
-                            except Exception:
-                                st.error("Gemini request failed. Check your API key, connection, and free-tier quota.")
-                    if "ai_job_description" in st.session_state:
-                        import json
-                        jd_result = st.session_state["ai_job_description"]
-                        st.json(jd_result)
-                        st.download_button("Download job description (JSON)", data=json.dumps(jd_result, indent=2, ensure_ascii=False), file_name="generated_job_description.json", mime="application/json", key="ai_jd_download")
-            except ValueError as error:
-                st.error(f"Could not prepare AI tools: {error}")
-            st.caption("AI output can be incorrect. Verify details, do not use it as the sole basis for hiring decisions, and upload resumes only when you have permission.")
-        else:
-            st.info("Upload a CSV above to enable the Gemini AI tools.")
+            # Optional Gemini tools run only after an explicit button click.
+            st.markdown("---")
+            st.markdown("## 3. Gemini AI tools")
+            st.caption("Optional AI tools for recruiters and job seekers. Resume text is sent to Google Gemini only when you run an AI action.")
+            if dataset_bytes is not None:
+                try:
+                    ai_df = load_resumes(dataset_bytes, dataset_name)
+                    from backend import _find_resume_column
+                    resume_column = _find_resume_column(ai_df)
+                    candidate_index = st.selectbox("Select a resume for AI analysis", options=list(range(len(ai_df))), format_func=lambda idx: f"Candidate {idx + 1}", key="ai_candidate_index")
+                    ai_resume_text = str(ai_df.iloc[candidate_index][resume_column] or "")
+                    tab_profile, tab_gap, tab_jd = st.tabs(["Resume Intelligence", "Skill Gap Analyzer", "Job Description Generator"])
+                    with tab_profile:
+                        st.write("Extract a structured profile grounded in one resume.")
+                        if st.button("Analyze selected resume", key="ai_analyze_resume", type="primary"):
+                            with st.spinner("Analyzing one resume with Gemini…"):
+                                try:
+                                    st.session_state["ai_resume_profile"] = analyze_resume(ai_resume_text)
+                                except (GeminiConfigurationError, ValueError, RuntimeError) as error:
+                                    st.error(str(error))
+                                except Exception:
+                                    st.error("Gemini request failed. Check your API key, connection, and free-tier quota.")
+                        if "ai_resume_profile" in st.session_state:
+                            st.json(st.session_state["ai_resume_profile"])
+                    with tab_gap:
+                        gap_description = st.text_area("Paste the target job description", height=170, key="ai_gap_description")
+                        if st.button("Analyze skill gaps", key="ai_analyze_gap", type="primary"):
+                            with st.spinner("Comparing one resume with the job description…"):
+                                try:
+                                    st.session_state["ai_skill_gap"] = analyze_skill_gap(ai_resume_text, gap_description)
+                                except (GeminiConfigurationError, ValueError, RuntimeError) as error:
+                                    st.error(str(error))
+                                except Exception:
+                                    st.error("Gemini request failed. Check your API key, connection, and free-tier quota.")
+                        if "ai_skill_gap" in st.session_state:
+                            st.json(st.session_state["ai_skill_gap"])
+                    with tab_jd:
+                        jd_title = st.text_input("Job title", key="ai_jd_title", placeholder="e.g. Junior Python Developer")
+                        jd_skills = st.text_input("Required skills (comma-separated)", key="ai_jd_skills", placeholder="Python, SQL, Git")
+                        left, right = st.columns(2)
+                        with left:
+                            jd_level = st.selectbox("Experience level", ["Entry level", "Junior", "Mid-level", "Senior", "Internship"], key="ai_jd_level")
+                        with right:
+                            jd_type = st.selectbox("Employment type", ["Full-time", "Part-time", "Internship", "Contract", "Temporary"], key="ai_jd_type")
+                        jd_context = st.text_area("Additional context (optional)", key="ai_jd_context", height=90)
+                        if st.button("Generate job description", key="ai_generate_jd", type="primary"):
+                            with st.spinner("Drafting a job description with Gemini…"):
+                                try:
+                                    st.session_state["ai_job_description"] = generate_job_description(jd_title, [item.strip() for item in jd_skills.split(",") if item.strip()], jd_level, jd_type, jd_context)
+                                except (GeminiConfigurationError, ValueError, RuntimeError) as error:
+                                    st.error(str(error))
+                                except Exception:
+                                    st.error("Gemini request failed. Check your API key, connection, and free-tier quota.")
+                        if "ai_job_description" in st.session_state:
+                            import json
+                            jd_result = st.session_state["ai_job_description"]
+                            st.json(jd_result)
+                            st.download_button("Download job description (JSON)", data=json.dumps(jd_result, indent=2, ensure_ascii=False), file_name="generated_job_description.json", mime="application/json", key="ai_jd_download")
+                except ValueError as error:
+                    st.error(f"Could not prepare AI tools: {error}")
+                st.caption("AI output can be incorrect. Verify details, do not use it as the sole basis for hiring decisions, and upload resumes only when you have permission.")
+            else:
+                st.info("Upload a CSV above to enable the Gemini AI tools.")
 
 
 

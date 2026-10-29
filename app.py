@@ -329,6 +329,8 @@ def _main() -> None:
         .small-note { color: #68758d; font-size: .92rem; }
         .footer-note { color: #7b869b; text-align: center; font-size: .82rem; padding-top: 1.8rem; }
 
+        .hero-brand { display:flex; align-items:center; margin:0 0 .75rem .1rem; }
+        .hero-brand img { object-fit:contain; }
         .about-hero { position: relative; overflow: hidden; padding: 2rem 2.2rem 2.15rem; border-radius: 24px; color: #fff; background: radial-gradient(circle at 88% 12%, rgba(111,142,255,.32), transparent 30%), linear-gradient(135deg,#0c1830 0%,#142b59 58%,#3558a4 100%); box-shadow: 0 20px 48px rgba(20,43,89,.16); margin: .3rem 0 2.1rem; }
         .about-topline { display:flex; align-items:center; gap:11px; color:#c8d6ff; font-size:.72rem; font-weight:800; letter-spacing:.16em; }
         .about-monogram,.about-signoff-mark { display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; width:39px; height:39px; border:1px solid rgba(255,255,255,.32); border-radius:13px; background:rgba(255,255,255,.1); color:#fff; font-size:.85rem; font-weight:850; letter-spacing:-.02em; }
@@ -550,8 +552,10 @@ def _main() -> None:
 
     if page == "Home":
         home_logo_path = Path(__file__).parent / "assets" / "resume-search-logo.svg"
+        st.markdown('<div class="hero-brand">', unsafe_allow_html=True)
         if home_logo_path.exists():
-            st.image(str(home_logo_path), width=112)
+            st.image(str(home_logo_path), width=64)
+        st.markdown('</div>', unsafe_allow_html=True)
         st.markdown("""<div class="hero"><div class="hero-kicker">Candidate discovery workspace</div><h1>Find the right talent,<br>faster.</h1><p>Use Gemini AI, upload your dataset, or browse your available resumes.</p></div>""", unsafe_allow_html=True)
         st.markdown('<div class="small-note">Choose where you want to start.</div>', unsafe_allow_html=True)
         with st.container(key="home_cards"):
@@ -807,9 +811,13 @@ def _main() -> None:
 
     elif page == "Edit Profile":
         profile_logo_path = Path(__file__).parent / "assets" / "resume-search-logo.svg"
-        if profile_logo_path.exists():
-            st.image(str(profile_logo_path), width=112)
-        st.markdown("## Edit Profile")
+        profile_col, profile_title_col = st.columns([0.55, 5], vertical_alignment="center")
+        with profile_col:
+            if profile_logo_path.exists():
+                st.image(str(profile_logo_path), width=42)
+        with profile_title_col:
+            st.markdown("## Resume Search")
+        st.markdown("### Edit Profile")
         st.caption("Display preferences apply to this browser session; the account database is unchanged.")
         st.text_input("Account email", value=st.session_state.get("resume_search_email", ""), disabled=True)
         display_name = st.text_input("Display name", value=st.session_state.get("resume_search_display_name", ""), key="profile_display_name_input")

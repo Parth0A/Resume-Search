@@ -449,10 +449,10 @@ def _main() -> None:
 
 
     # Keep navigation state in the existing Streamlit session; no backend or data model changes.
-    pages = ["Home", "Gemini AI", "Upload Dataset", "See Resumes", "Search Resume", "Edit Profile", "Change Icon", "About This Project"]
     role = st.session_state.get("resume_search_role", "Recruiter")
-    if role == "Job seeker":
-        pages = ["Home", "Gemini AI", "Edit Profile", "Change Icon", "About This Project"]
+    pages = ["Home", "Gemini AI", "Upload Dataset", "See Resumes", "Edit Profile", "Change Icon", "About This Project"]
+    if role != "Job seeker":
+        pages.append("Search Resume")
     if "resume_search_page" not in st.session_state:
         st.session_state["resume_search_page"] = "Home"
     if st.session_state["resume_search_page"] not in pages:
@@ -467,9 +467,9 @@ def _main() -> None:
         st.markdown(f'<div class="brand-mark"><span class="brand-icon">{st.session_state["resume_search_icon"]}</span><span>Resume <span class="brand-accent">Search</span></span></div>', unsafe_allow_html=True)
         st.caption(f"Signed in as {role}")
         st.markdown("### Workspace")
-        nav_items = [("Home", "⌂"), ("Gemini AI", "✦")]
+        nav_items = [("Home", "⌂"), ("Gemini AI", "✦"), ("Upload Dataset", "⇧"), ("See Resumes", "▤")]
         if role != "Job seeker":
-            nav_items.extend([("Upload Dataset", "⇧"), ("See Resumes", "▤"), ("Search Resume", "⌕")])
+            nav_items.append(("Search Resume", "⌕"))
         for page_name, page_icon in nav_items:
             if st.button(f"{page_icon}  {page_name}", key=f"nav_{page_name}", use_container_width=True):
                 st.session_state["resume_search_page"] = page_name

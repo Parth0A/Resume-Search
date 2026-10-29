@@ -332,34 +332,34 @@ def _main() -> None:
             .hero { padding: 1.35rem 1.15rem; border-radius: 15px; }
         }
 
-        /* Minimal olive-green UI refresh; preserve existing search and AI logic. */
-        :root { --rs-olive: #647344; --rs-olive-dark: #4f5e34; --rs-border: #647344; }
-        .stApp { background: #f7f8f4; color: #25291f; }
-        [data-testid="stSidebar"] { background: #303a25 !important; }
-        [data-testid="stSidebar"] * { color: #ffffff !important; }
-        [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p { color: #f0f3e8 !important; }
-        .brand-icon { background: var(--rs-olive) !important; }
-        .brand-accent { color: #d5e0bb !important; }
-        .hero { background: linear-gradient(125deg, #3f4c2c 0%, #647344 68%, #7d8d59 100%) !important; }
-        .hero-kicker { color: #edf3df !important; }
+        /* Restore the original navy-and-blue theme while keeping the current layout and profile option. */
+        :root { --rs-navy: #142b59; --rs-navy-strong: #10234b; --rs-border: #18396f; }
+        .stApp { background: #f7f9fd; color: #172642; }
+        [data-testid="stSidebar"] { background: #101b31 !important; }
+        [data-testid="stSidebar"] * { color: #eef3ff !important; }
+        [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p { color: #c7d3ee !important; }
+        .brand-icon { background: linear-gradient(135deg, #4d6bff, #8c74ff) !important; }
+        .brand-accent { color: #8ea6ff !important; }
+        .hero { background: linear-gradient(125deg, #101b31 0%, #233b72 64%, #526fe2 100%) !important; }
+        .hero-kicker { color: #bdcaff !important; }
         div.stButton > button, div.stFormSubmitButton > button, div.stDownloadButton > button, div[data-testid="stFileUploader"] button {
-            background: var(--rs-olive) !important; color: #ffffff !important; border: 1px solid var(--rs-olive-dark) !important;
-            border-radius: 14px !important; font-weight: 700 !important; min-height: 2.8rem; box-shadow: none !important;
+            background: var(--rs-navy) !important; color: #ffffff !important; border: 1px solid var(--rs-navy-strong) !important;
+            border-radius: 12px !important; font-weight: 700 !important; min-height: 2.8rem; box-shadow: none !important;
         }
         div.stButton > button:hover, div.stFormSubmitButton > button:hover, div.stDownloadButton > button:hover, div[data-testid="stFileUploader"] button:hover {
-            background: var(--rs-olive-dark) !important; color: #ffffff !important;
+            background: var(--rs-navy-strong) !important; color: #ffffff !important;
         }
-        div.stButton > button:focus, div.stFormSubmitButton > button:focus, div.stDownloadButton > button:focus { outline: 2px solid #a9b98a !important; outline-offset: 2px !important; }
-        div[data-testid="stMultiSelect"] [data-baseweb="tag"] { background: var(--rs-olive) !important; border-color: var(--rs-olive-dark) !important; }
-        div[data-testid="stProgress"] > div > div { background: var(--rs-olive) !important; }
+        div.stButton > button:focus, div.stFormSubmitButton > button:focus, div.stDownloadButton > button:focus { outline: 2px solid #8ea6ff !important; outline-offset: 2px !important; }
+        div[data-testid="stMultiSelect"] [data-baseweb="tag"] { background: var(--rs-navy) !important; border-color: var(--rs-navy-strong) !important; }
+        div[data-testid="stProgress"] > div > div { background: linear-gradient(90deg, #18396f, #547dbb) !important; }
         .home-card-icon { font-size: 2.5rem; color: #ffffff; margin: .2rem 0 .9rem; }
         .home-card-title { color: #ffffff !important; font-size: 1.35rem; margin: 0 0 .7rem; }
-        .home-card-copy { color: #f5f7ef !important; min-height: 5.5rem; line-height: 1.6; }
-        [class*="st-key-home_card_"] { background: var(--rs-olive) !important; border: 1px solid var(--rs-olive-dark) !important; border-radius: 22px !important; padding: 1.5rem !important; min-height: 330px; }
+        .home-card-copy { color: #e0e8ff !important; min-height: 5.5rem; line-height: 1.6; }
+        [class*="st-key-home_card_"] { background: linear-gradient(135deg, #101b31, #233b72) !important; border: 1px solid #18396f !important; border-radius: 22px !important; padding: 1.5rem !important; min-height: 330px; }
         [class*="st-key-home_card_"] [data-testid="stMarkdownContainer"] p { color: #ffffff !important; }
-        [class*="st-key-home_card_"] div.stButton > button { background: var(--rs-olive-dark) !important; color: #ffffff !important; border: 1px solid #ffffff !important; border-radius: 999px !important; }
-        [class*="st-key-home_card_"] div.stButton > button:hover { background: #3f4c2c !important; color: #ffffff !important; }
-        [data-testid="stFileUploader"], [data-testid="stForm"], [data-testid="stMetric"], [data-testid="stExpander"], [data-testid="stVerticalBlockBorderWrapper"] { border-color: #cbd2bc !important; border-radius: 16px !important; }
+        [class*="st-key-home_card_"] div.stButton > button { background: #142b59 !important; color: #ffffff !important; border: 1px solid #8ea6ff !important; border-radius: 999px !important; }
+        [class*="st-key-home_card_"] div.stButton > button:hover { background: #10234b !important; color: #ffffff !important; }
+        [data-testid="stFileUploader"], [data-testid="stForm"], [data-testid="stMetric"], [data-testid="stExpander"], [data-testid="stVerticalBlockBorderWrapper"] { border-color: #18396f !important; border-radius: 16px !important; }
         @media (max-width: 700px) {
             .main .block-container { padding: 1rem .8rem 2rem; }
             [class*="st-key-home_cards"] [data-testid="stHorizontalBlock"] { flex-direction: column !important; gap: 1rem !important; }

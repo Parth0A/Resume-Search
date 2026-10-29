@@ -37,7 +37,11 @@ def _client() -> genai.Client:
             "Gemini is not configured. Add GEMINI_API_KEY=your_key to a local .env file. "
             "Never commit or share that file."
         )
-    return genai.Client(api_key=api_key)
+    # Prevent Streamlit from appearing to hang indefinitely on a stalled API request.
+    return genai.Client(
+        api_key=api_key,
+        http_options=types.HttpOptions(timeout=30_000),  # milliseconds
+    )
 
 
 def _generate_json(task: str, prompt: str) -> dict[str, Any]:
@@ -56,7 +60,7 @@ def _generate_json(task: str, prompt: str) -> dict[str, Any]:
             ),
             response_mime_type="application/json",
             temperature=0.2,
-            max_output_tokens=1400,
+            max_output_tokens=1000,
         ),
     )
     text = (response.text or "").strip()

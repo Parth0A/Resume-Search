@@ -162,18 +162,18 @@ def _main() -> None:
         }
         div[data-testid="stMultiSelect"] input { background: transparent !important; }
         div.stButton > button, div.stFormSubmitButton > button, div.stDownloadButton > button {
-            background: #6B7D3A !important;
+            background: #142b59 !important;
             color: #ffffff !important;
-            border: 1.5px solid #6B7D3A !important;
+            border: 1.5px solid #142b59 !important;
             border-radius: 12px !important;
             font-weight: 650;
             min-height: 2.7rem;
             box-shadow: none !important;
         }
         div.stButton > button:hover, div.stFormSubmitButton > button:hover, div.stDownloadButton > button:hover {
-            background: #596A2F !important;
+            background: #10234b !important;
             color: #ffffff !important;
-            border-color: #596A2F !important;
+            border-color: #10234b !important;
         }
         div.stFormSubmitButton > button[kind="primary"] {
             background: var(--rs-navy) !important;
@@ -540,7 +540,7 @@ def _main() -> None:
                 st.session_state["resume_search_page"] = "See Resumes"
                 st.rerun()
         else:
-            st.info("After a valid upload, the olive-green See Resumes button will appear here.")
+            st.info("After a valid upload, the See Resumes button will appear here.")
 
     elif page == "See Resumes":
         st.markdown("## See Resumes")

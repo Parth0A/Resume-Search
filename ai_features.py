@@ -16,7 +16,7 @@ from google.genai import types
 load_dotenv()
 
 # Use a fast Flash model to keep latency and token usage modest.
-DEFAULT_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+DEFAULT_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
 MAX_RESUME_CHARS = 12_000
 MAX_JOB_DESCRIPTION_CHARS = 8_000
 

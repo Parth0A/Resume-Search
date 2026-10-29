@@ -524,6 +524,9 @@ def _main() -> None:
                 st.error(f"Could not read this dataset: {error}")
             except Exception:
                 st.error("Could not validate this CSV. Check its format and try again.")
+        # Refresh local values immediately so the See Resumes action appears after this upload.
+        dataset_bytes = st.session_state.get("resume_dataset_bytes")
+        dataset_name = st.session_state.get("resume_dataset_name") or "uploaded_resumes.csv"
         if dataset_bytes is not None:
             st.success(f"Current dataset: {dataset_name}")
             if st.button("See Resumes", key="upload_see_resumes", type="primary"):

@@ -326,7 +326,7 @@ def _main() -> None:
         }
 
         /* Minimal olive-green UI refresh; preserve existing search and AI logic. */
-        :root { --rs-olive: #647344; --rs-olive-dark: #4f5e34; --rs-olive-soft: #edf0e5; --rs-border: #647344; }
+        :root { --rs-olive: #647344; --rs-olive-dark: #4f5e34; --rs-border: #647344; }
         .stApp { background: #f7f8f4; color: #25291f; }
         [data-testid="stSidebar"] { background: #303a25 !important; }
         [data-testid="stSidebar"] * { color: #ffffff !important; }
@@ -335,37 +335,24 @@ def _main() -> None:
         .brand-accent { color: #d5e0bb !important; }
         .hero { background: linear-gradient(125deg, #3f4c2c 0%, #647344 68%, #7d8d59 100%) !important; }
         .hero-kicker { color: #edf3df !important; }
-        div.stButton > button, div.stFormSubmitButton > button, div.stDownloadButton > button,
-        div[data-testid="stFileUploader"] button {
-            background: var(--rs-olive) !important; color: #ffffff !important;
-            border: 1px solid var(--rs-olive-dark) !important; border-radius: 14px !important;
-            font-weight: 700 !important; min-height: 2.8rem; box-shadow: none !important;
+        div.stButton > button, div.stFormSubmitButton > button, div.stDownloadButton > button, div[data-testid="stFileUploader"] button {
+            background: var(--rs-olive) !important; color: #ffffff !important; border: 1px solid var(--rs-olive-dark) !important;
+            border-radius: 14px !important; font-weight: 700 !important; min-height: 2.8rem; box-shadow: none !important;
         }
-        div.stButton > button:hover, div.stFormSubmitButton > button:hover, div.stDownloadButton > button:hover,
-        div[data-testid="stFileUploader"] button:hover { background: var(--rs-olive-dark) !important; color: #ffffff !important; }
-        div.stButton > button:focus, div.stFormSubmitButton > button:focus, div.stDownloadButton > button:focus {
-            outline: 2px solid #a9b98a !important; outline-offset: 2px !important;
+        div.stButton > button:hover, div.stFormSubmitButton > button:hover, div.stDownloadButton > button:hover, div[data-testid="stFileUploader"] button:hover {
+            background: var(--rs-olive-dark) !important; color: #ffffff !important;
         }
+        div.stButton > button:focus, div.stFormSubmitButton > button:focus, div.stDownloadButton > button:focus { outline: 2px solid #a9b98a !important; outline-offset: 2px !important; }
         div[data-testid="stMultiSelect"] [data-baseweb="tag"] { background: var(--rs-olive) !important; border-color: var(--rs-olive-dark) !important; }
         div[data-testid="stProgress"] > div > div { background: var(--rs-olive) !important; }
         .home-card-icon { font-size: 2.5rem; color: #ffffff; margin: .2rem 0 .9rem; }
         .home-card-title { color: #ffffff !important; font-size: 1.35rem; margin: 0 0 .7rem; }
         .home-card-copy { color: #f5f7ef !important; min-height: 5.5rem; line-height: 1.6; }
-        [class*="st-key-home_card_"] {
-            background: var(--rs-olive) !important; border: 1px solid var(--rs-olive-dark) !important;
-            border-radius: 22px !important; padding: 1.5rem !important; min-height: 330px;
-            display: flex; flex-direction: column; justify-content: space-between;
-        }
+        [class*="st-key-home_card_"] { background: var(--rs-olive) !important; border: 1px solid var(--rs-olive-dark) !important; border-radius: 22px !important; padding: 1.5rem !important; min-height: 330px; }
         [class*="st-key-home_card_"] [data-testid="stMarkdownContainer"] p { color: #ffffff !important; }
-        [class*="st-key-home_card_"] div.stButton > button {
-            background: #ffffff !important; color: var(--rs-olive-dark) !important;
-            border: 1px solid #ffffff !important; border-radius: 999px !important;
-        }
+        [class*="st-key-home_card_"] div.stButton > button { background: #ffffff !important; color: var(--rs-olive-dark) !important; border: 1px solid #ffffff !important; border-radius: 999px !important; }
         [class*="st-key-home_card_"] div.stButton > button:hover { background: #edf0e5 !important; }
-        [data-testid="stFileUploader"], [data-testid="stForm"], [data-testid="stMetric"],
-        [data-testid="stExpander"], [data-testid="stVerticalBlockBorderWrapper"] {
-            border-color: #cbd2bc !important; border-radius: 16px !important;
-        }
+        [data-testid="stFileUploader"], [data-testid="stForm"], [data-testid="stMetric"], [data-testid="stExpander"], [data-testid="stVerticalBlockBorderWrapper"] { border-color: #cbd2bc !important; border-radius: 16px !important; }
         @media (max-width: 700px) {
             .main .block-container { padding: 1rem .8rem 2rem; }
             [class*="st-key-home_cards"] [data-testid="stHorizontalBlock"] { flex-direction: column !important; gap: 1rem !important; }
@@ -465,7 +452,6 @@ def _main() -> None:
     role = st.session_state.get("resume_search_role", "Recruiter")
     if role == "Job seeker":
         pages = ["Home", "Gemini AI", "Edit Profile", "Change Icon", "About This Project"]
-
     if "resume_search_page" not in st.session_state:
         st.session_state["resume_search_page"] = "Home"
     if st.session_state["resume_search_page"] not in pages:
@@ -477,10 +463,7 @@ def _main() -> None:
         st.session_state["resume_search_icon"] = "⌕"
 
     with st.sidebar:
-        st.markdown(
-            f'<div class="brand-mark"><span class="brand-icon">{st.session_state["resume_search_icon"]}</span><span>Resume <span class="brand-accent">Search</span></span></div>',
-            unsafe_allow_html=True,
-        )
+        st.markdown(f'<div class="brand-mark"><span class="brand-icon">{st.session_state["resume_search_icon"]}</span><span>Resume <span class="brand-accent">Search</span></span></div>', unsafe_allow_html=True)
         st.caption(f"Signed in as {role}")
         st.markdown("### Workspace")
         nav_items = [("Home", "⌂"), ("Gemini AI", "✦")]
@@ -508,16 +491,7 @@ def _main() -> None:
     dataset_name = st.session_state.get("resume_dataset_name") or "uploaded_resumes.csv"
 
     if page == "Home":
-        st.markdown(
-            """
-            <div class="hero">
-              <div class="hero-kicker">Candidate discovery workspace</div>
-              <h1>Find the right talent,<br>faster.</h1>
-              <p>Use Gemini AI, upload your dataset, or browse your available resumes.</p>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        st.markdown("""<div class="hero"><div class="hero-kicker">Candidate discovery workspace</div><h1>Find the right talent,<br>faster.</h1><p>Use Gemini AI, upload your dataset, or browse your available resumes.</p></div>""", unsafe_allow_html=True)
         st.markdown('<div class="small-note">Choose where you want to start.</div>', unsafe_allow_html=True)
         with st.container(key="home_cards"):
             card_columns = st.columns(3, gap="large")
@@ -530,7 +504,6 @@ def _main() -> None:
                 with column:
                     with st.container(border=True, key=f"home_card_{card_title.lower().replace(' ', '_')}"):
                         st.markdown(f'<div class="home-card-icon">{card_icon}</div><h2 class="home-card-title">{card_title}</h2><p class="home-card-copy">{description}</p>', unsafe_allow_html=True)
-                        st.write("")
                         if st.button(button_label, key=f"home_action_{card_title}", use_container_width=True):
                             st.session_state["resume_search_page"] = card_title
                             st.rerun()
@@ -593,88 +566,88 @@ def _main() -> None:
                 st.session_state["resume_search_page"] = "Upload Dataset"
                 st.rerun()
         else:
-        st.markdown("## 2. Search resumes")
-        with st.form("search_form", clear_on_submit=False):
-            role_col, exp_col, limit_col = st.columns([2, 1, 1])
-            with role_col:
-                selected_role = st.selectbox(
-                    "Choose a job role *",
-                    [
-                        "Software Engineer", "Python Developer", "Java Developer",
-                        "Frontend Developer", "Backend Developer", "Full Stack Developer",
-                        "Data Analyst", "Data Scientist", "Machine Learning Engineer",
-                        "AI Engineer", "DevOps Engineer", "Cybersecurity Analyst",
-                        "Web Developer", "Mobile App Developer", "UI / UX Designer",
-                        "QA / Test Engineer", "Other / custom role",
-                    ],
-                )
-                if selected_role == "Other / custom role":
-                    job_title = st.text_input("Enter your job role *", placeholder="e.g. Embedded Systems Engineer")
-                else:
-                    job_title = selected_role
-            with exp_col:
-                min_experience = st.selectbox(
-                    "Minimum experience",
-                    options=["Any experience", "1 year", "2 years", "3 years", "5 years", "7 years", "10 years"],
-                    index=0,
-                    help="Unknown experience is excluded when a minimum is selected.",
-                )
-            with limit_col:
-                results_limit = st.selectbox("Candidates to show", options=[5, 10, 25], index=1)
-            skill_options = [
-                "Python", "Java", "JavaScript", "TypeScript", "C", "C++", "C#",
-                "HTML", "CSS", "React", "Angular", "Node.js", "Django", "Flask",
-                "SQL", "MySQL", "PostgreSQL", "MongoDB", "Excel", "Power BI",
-                "Pandas", "NumPy", "Machine Learning", "Deep Learning", "AI",
-                "TensorFlow", "PyTorch", "Git", "GitHub", "Docker", "AWS",
-                "Azure", "Linux", "Cybersecurity", "Networking", "REST API",
-                "Figma", "UI/UX", "Selenium", "Testing", "Communication",
-            ]
-            selected_skills = st.multiselect(
-                "Choose skills / programming languages (optional)",
-                options=skill_options,
-                placeholder="Select one or more skills",
-            )
-            custom_skills_text = st.text_input(
-                "Other skills (optional)",
-                placeholder="Add skills not listed, separated by commas",
-            )
-            submitted = st.form_submit_button("Search resumes", type="primary", use_container_width=True)
-
-        st.caption("* Required field. Search scores measure text relevance and do not make hiring decisions.")
-
-        if submitted:
-            if dataset_bytes is None:
-                st.error("Please upload a resume CSV before searching.")
-                return
-            if not job_title.strip():
-                st.error("Enter a job title or role to start the search.")
-                return
-            try:
-                extra_skills = _parse_skills(custom_skills_text)
-                skills = list(dict.fromkeys(selected_skills + extra_skills))
-                experience_value: int | None = None
-                if min_experience != "Any experience":
-                    experience_value = int(min_experience.split()[0])
-            except (ValueError, TypeError) as error:
-                st.error(str(error) or "Please check your search criteria.")
-                return
-
-            with st.spinner("Reading resumes and ranking matches…"):
-                try:
-                    df = load_resumes(dataset_bytes, dataset_name)
-                    results = search_resumes(
-                        df=df,
-                        job_title=job_title.strip(),
-                        skills=skills,
-                        min_experience=experience_value,
-                        limit=int(results_limit),
+            st.markdown("## 2. Search resumes")
+            with st.form("search_form", clear_on_submit=False):
+                role_col, exp_col, limit_col = st.columns([2, 1, 1])
+                with role_col:
+                    selected_role = st.selectbox(
+                        "Choose a job role *",
+                        [
+                            "Software Engineer", "Python Developer", "Java Developer",
+                            "Frontend Developer", "Backend Developer", "Full Stack Developer",
+                            "Data Analyst", "Data Scientist", "Machine Learning Engineer",
+                            "AI Engineer", "DevOps Engineer", "Cybersecurity Analyst",
+                            "Web Developer", "Mobile App Developer", "UI / UX Designer",
+                            "QA / Test Engineer", "Other / custom role",
+                        ],
                     )
-                    _render_results(results)
-                except ValueError as error:
-                    st.error(f"Could not complete the search: {error}")
-                except Exception:
-                    st.error("Something went wrong while processing this dataset. Check the CSV and available memory, then try again.")
+                    if selected_role == "Other / custom role":
+                        job_title = st.text_input("Enter your job role *", placeholder="e.g. Embedded Systems Engineer")
+                    else:
+                        job_title = selected_role
+                with exp_col:
+                    min_experience = st.selectbox(
+                        "Minimum experience",
+                        options=["Any experience", "1 year", "2 years", "3 years", "5 years", "7 years", "10 years"],
+                        index=0,
+                        help="Unknown experience is excluded when a minimum is selected.",
+                    )
+                with limit_col:
+                    results_limit = st.selectbox("Candidates to show", options=[5, 10, 25], index=1)
+                skill_options = [
+                    "Python", "Java", "JavaScript", "TypeScript", "C", "C++", "C#",
+                    "HTML", "CSS", "React", "Angular", "Node.js", "Django", "Flask",
+                    "SQL", "MySQL", "PostgreSQL", "MongoDB", "Excel", "Power BI",
+                    "Pandas", "NumPy", "Machine Learning", "Deep Learning", "AI",
+                    "TensorFlow", "PyTorch", "Git", "GitHub", "Docker", "AWS",
+                    "Azure", "Linux", "Cybersecurity", "Networking", "REST API",
+                    "Figma", "UI/UX", "Selenium", "Testing", "Communication",
+                ]
+                selected_skills = st.multiselect(
+                    "Choose skills / programming languages (optional)",
+                    options=skill_options,
+                    placeholder="Select one or more skills",
+                )
+                custom_skills_text = st.text_input(
+                    "Other skills (optional)",
+                    placeholder="Add skills not listed, separated by commas",
+                )
+                submitted = st.form_submit_button("Search resumes", type="primary", use_container_width=True)
+
+            st.caption("* Required field. Search scores measure text relevance and do not make hiring decisions.")
+
+            if submitted:
+                if dataset_bytes is None:
+                    st.error("Please upload a resume CSV before searching.")
+                    return
+                if not job_title.strip():
+                    st.error("Enter a job title or role to start the search.")
+                    return
+                try:
+                    extra_skills = _parse_skills(custom_skills_text)
+                    skills = list(dict.fromkeys(selected_skills + extra_skills))
+                    experience_value: int | None = None
+                    if min_experience != "Any experience":
+                        experience_value = int(min_experience.split()[0])
+                except (ValueError, TypeError) as error:
+                    st.error(str(error) or "Please check your search criteria.")
+                    return
+
+                with st.spinner("Reading resumes and ranking matches…"):
+                    try:
+                        df = load_resumes(dataset_bytes, dataset_name)
+                        results = search_resumes(
+                            df=df,
+                            job_title=job_title.strip(),
+                            skills=skills,
+                            min_experience=experience_value,
+                            limit=int(results_limit),
+                        )
+                        _render_results(results)
+                    except ValueError as error:
+                        st.error(f"Could not complete the search: {error}")
+                    except Exception:
+                        st.error("Something went wrong while processing this dataset. Check the CSV and available memory, then try again.")
 
 
 
@@ -770,7 +743,7 @@ def _main() -> None:
 
     elif page == "Edit Profile":
         st.markdown("## Edit Profile")
-        st.caption("These display preferences apply to this browser session; your existing account database is unchanged.")
+        st.caption("Display preferences apply to this browser session; the account database is unchanged.")
         st.text_input("Account email", value=st.session_state.get("resume_search_email", ""), disabled=True)
         display_name = st.text_input("Display name", value=st.session_state.get("resume_search_display_name", ""), key="profile_display_name_input")
         if st.button("Save Profile", key="save_profile", type="primary"):
@@ -792,10 +765,7 @@ def _main() -> None:
         st.write("Search scores measure text similarity only. They are not hiring probabilities, and results should be reviewed by a person.")
         st.write("Uploaded datasets and profile display preferences are kept in the current Streamlit session; they are not permanently saved by these interface changes.")
 
-    st.markdown(
-        '<div class="footer-note">Resume Search · Review resume evidence carefully. Automated relevance scores should support—not replace—human judgment.</div>',
-        unsafe_allow_html=True,
-    )
+    st.markdown('<div class="footer-note">Resume Search · Review resume evidence carefully. Automated relevance scores should support—not replace—human judgment.</div>', unsafe_allow_html=True)
 
 
 

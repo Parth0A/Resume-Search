@@ -350,12 +350,13 @@ def _main() -> None:
         .home-card-copy { color: #f5f7ef !important; min-height: 5.5rem; line-height: 1.6; }
         [class*="st-key-home_card_"] { background: var(--rs-olive) !important; border: 1px solid var(--rs-olive-dark) !important; border-radius: 22px !important; padding: 1.5rem !important; min-height: 330px; }
         [class*="st-key-home_card_"] [data-testid="stMarkdownContainer"] p { color: #ffffff !important; }
-        [class*="st-key-home_card_"] div.stButton > button { background: #ffffff !important; color: var(--rs-olive-dark) !important; border: 1px solid #ffffff !important; border-radius: 999px !important; }
-        [class*="st-key-home_card_"] div.stButton > button:hover { background: #edf0e5 !important; }
+        [class*="st-key-home_card_"] div.stButton > button { background: var(--rs-olive-dark) !important; color: #ffffff !important; border: 1px solid #ffffff !important; border-radius: 999px !important; }
+        [class*="st-key-home_card_"] div.stButton > button:hover { background: #3f4c2c !important; color: #ffffff !important; }
         [data-testid="stFileUploader"], [data-testid="stForm"], [data-testid="stMetric"], [data-testid="stExpander"], [data-testid="stVerticalBlockBorderWrapper"] { border-color: #cbd2bc !important; border-radius: 16px !important; }
         @media (max-width: 700px) {
             .main .block-container { padding: 1rem .8rem 2rem; }
             [class*="st-key-home_cards"] [data-testid="stHorizontalBlock"] { flex-direction: column !important; gap: 1rem !important; }
+            [class*="st-key-home_cards"] [data-testid="stHorizontalBlock"] > [data-testid="column"] { width: 100% !important; min-width: 100% !important; flex: 1 1 100% !important; }
             [class*="st-key-home_card_"] { min-height: 250px; width: 100% !important; }
             .home-card-copy { min-height: 0; }
             .hero { padding: 1.35rem 1.15rem; border-radius: 15px; }

@@ -466,6 +466,51 @@ def _main() -> None:
             div[data-testid="stForm"] { background:#fff; border:1px solid #e1e7f2; border-radius:20px; padding:1.25rem 1.35rem; box-shadow:0 18px 48px rgba(30,48,90,.07); }
             div.stButton > button, div.stFormSubmitButton > button { min-height:2.8rem; border-radius:10px; font-weight:700; }
             .login-foot { color:#8a95a8; text-align:center; font-size:.8rem; margin-top:1.2rem; }
+
+            /* Login form contrast fix: override all earlier global/dark-theme input rules. */
+            div[data-testid="stForm"] div[data-testid="stTextInput"] input,
+            div[data-testid="stForm"] div[data-testid="stTextInput"] input:focus,
+            div[data-testid="stForm"] div[data-testid="stTextInput"] input:hover,
+            div[data-testid="stForm"] div[data-testid="stTextInput"] input:-webkit-autofill,
+            div[data-testid="stForm"] div[data-testid="stTextInput"] input:-webkit-autofill:hover,
+            div[data-testid="stForm"] div[data-testid="stTextInput"] input:-webkit-autofill:focus {
+                background: #ffffff !important;
+                background-color: #ffffff !important;
+                color: #172642 !important;
+                -webkit-text-fill-color: #172642 !important;
+                caret-color: #172642 !important;
+                opacity: 1 !important;
+                box-shadow: 0 0 0 1000px #ffffff inset !important;
+                border: 1.5px solid #18396f !important;
+            }
+            div[data-testid="stForm"] div[data-testid="stTextInput"] input::placeholder {
+                color: #68758d !important;
+                -webkit-text-fill-color: #68758d !important;
+                opacity: 1 !important;
+            }
+            /* Keep both radio choices and their labels visible on the light login page. */
+            div[data-testid="stRadio"] [role="radiogroup"] {
+                display: flex !important;
+                flex-direction: row !important;
+                gap: 1.4rem !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+            }
+            div[data-testid="stRadio"] [role="radio"] {
+                visibility: visible !important;
+                opacity: 1 !important;
+            }
+            div[data-testid="stRadio"] label,
+            div[data-testid="stRadio"] label p,
+            div[data-testid="stRadio"] [data-testid="stMarkdownContainer"],
+            div[data-testid="stRadio"] [data-testid="stMarkdownContainer"] p {
+                color: #172642 !important;
+                -webkit-text-fill-color: #172642 !important;
+                opacity: 1 !important;
+            }
+            div[data-testid="stRadio"] [role="radio"] > div {
+                border-color: #18396f !important;
+            }
             @media(max-width:760px) { .login-brand-panel { min-height:unset; padding:1.5rem; margin-bottom:1rem; } .login-title { font-size:2.4rem; } }
             </style>
             """,

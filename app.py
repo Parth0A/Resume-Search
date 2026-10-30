@@ -590,7 +590,8 @@ def _main() -> None:
             with st.form("resume_search_auth_form", clear_on_submit=False):
                 login_email = st.text_input("Email address", placeholder="you@company.com")
                 login_password = st.text_input("Password", type="password", placeholder="At least 8 characters" if login_mode == "Create account" else "Enter your password")
-                login_role = st.selectbox("I am a", ["Recruiter", "Job seeker"])
+                # New accounts use the recruiter workspace; existing accounts retain their saved role.
+                login_role = "Recruiter"
                 auth_submit = st.form_submit_button("Create account" if login_mode == "Create account" else "Sign in", type="primary", use_container_width=True)
             if auth_submit:
                 try:
@@ -603,14 +604,11 @@ def _main() -> None:
                         if user is None:
                             st.error("Email or password is incorrect.")
                     if user is not None:
-                        if user["role"] != login_role:
-                            st.warning(f"This account is registered as {user['role']}. Select that account type to continue.")
-                        else:
-                            st.session_state["resume_search_signed_in"] = True
-                            st.session_state["resume_search_user_id"] = user["id"]
-                            st.session_state["resume_search_email"] = user["email"]
-                            st.session_state["resume_search_role"] = user["role"]
-                            st.rerun()
+                        st.session_state["resume_search_signed_in"] = True
+                        st.session_state["resume_search_user_id"] = user["id"]
+                        st.session_state["resume_search_email"] = user["email"]
+                        st.session_state["resume_search_role"] = user["role"]
+                        st.rerun()
                 except ValueError as error:
                     st.error(str(error))
                 except Exception:

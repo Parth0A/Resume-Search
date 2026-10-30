@@ -511,6 +511,45 @@ def _main() -> None:
             div[data-testid="stRadio"] [role="radio"] > div {
                 border-color: #18396f !important;
             }
+            /* Final high-specificity overrides for Streamlit/BaseWeb login controls. */
+            html body .stApp div[data-testid="stForm"] input,
+            html body .stApp div[data-testid="stTextInput"] input,
+            html body .stApp input[data-baseweb="input"],
+            html body .stApp [data-baseweb="base-input"] input {
+                background-color: #ffffff !important;
+                color: #172642 !important;
+                -webkit-text-fill-color: #172642 !important;
+                caret-color: #172642 !important;
+                opacity: 1 !important;
+                text-shadow: none !important;
+                box-shadow: inset 0 0 0 1000px #ffffff !important;
+            }
+            html body .stApp div[data-testid="stForm"] input::placeholder,
+            html body .stApp div[data-testid="stTextInput"] input::placeholder {
+                color: #68758d !important;
+                -webkit-text-fill-color: #68758d !important;
+                opacity: 1 !important;
+            }
+            html body .stApp div[data-testid="stForm"] [data-baseweb="input"],
+            html body .stApp div[data-testid="stForm"] [data-baseweb="base-input"] {
+                background-color: #ffffff !important;
+                color: #172642 !important;
+            }
+            html body .stApp div[data-testid="stSegmentedControl"] button,
+            html body .stApp div[data-testid="stSegmentedControl"] button *,
+            html body .stApp div[data-testid="stSegmentedControl"] label,
+            html body .stApp div[data-testid="stSegmentedControl"] p {
+                color: #172642 !important;
+                -webkit-text-fill-color: #172642 !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+            }
+            html body .stApp div[data-testid="stSegmentedControl"] button[aria-pressed="true"],
+            html body .stApp div[data-testid="stSegmentedControl"] button[aria-pressed="true"] * {
+                background-color: #18396f !important;
+                color: #ffffff !important;
+                -webkit-text-fill-color: #ffffff !important;
+            }
             @media(max-width:760px) { .login-brand-panel { min-height:unset; padding:1.5rem; margin-bottom:1rem; } .login-title { font-size:2.4rem; } }
             </style>
             """,
@@ -538,7 +577,16 @@ def _main() -> None:
         with form_col:
             st.markdown('<div class="login-heading">Welcome back</div>', unsafe_allow_html=True)
             st.markdown('<div class="login-muted">Sign in or create an account to continue.</div>', unsafe_allow_html=True)
-            login_mode = st.radio("Account access", ["Sign in", "Create account"], horizontal=True, label_visibility="collapsed", key="login_mode")
+            # Use a segmented control so both authentication modes remain visibly labelled.
+            login_mode = st.segmented_control(
+                "Account access",
+                options=["Sign in", "Create account"],
+                default="Sign in",
+                key="login_mode",
+                label_visibility="collapsed",
+                selection_mode="single",
+                help="Choose whether to sign in or create a new account.",
+            ) or "Sign in"
             with st.form("resume_search_auth_form", clear_on_submit=False):
                 login_email = st.text_input("Email address", placeholder="you@company.com")
                 login_password = st.text_input("Password", type="password", placeholder="At least 8 characters" if login_mode == "Create account" else "Enter your password")

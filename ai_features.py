@@ -16,7 +16,12 @@ from google.genai import types
 load_dotenv()
 
 # Use a fast Flash model to keep latency and token usage modest.
-DEFAULT_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+_configured_model = os.getenv("GEMINI_MODEL", "").strip()
+# Upgrade the retired default even when an older .env still sets it explicitly.
+if _configured_model in {"gemini-2.5-flash", "models/gemini-2.5-flash"}:
+    DEFAULT_MODEL = "gemini-3.8-flash"
+else:
+    DEFAULT_MODEL = _configured_model or "gemini-3.8-flash"
 MAX_RESUME_CHARS = 12_000
 MAX_JOB_DESCRIPTION_CHARS = 8_000
 
@@ -32,7 +37,11 @@ def _client() -> genai.Client:
             "Gemini is not configured. Add GEMINI_API_KEY=your_key to a local .env file. "
             "Never commit or share that file."
         )
-    return genai.Client(api_key=api_key)
+    # Prevent Streamlit from appearing to hang indefinitely on a stalled API request.
+    return genai.Client(
+        api_key=api_key,
+        http_options=types.HttpOptions(timeout=30_000),  # milliseconds
+    )
 
 
 def _generate_json(task: str, prompt: str) -> dict[str, Any]:
@@ -51,7 +60,7 @@ def _generate_json(task: str, prompt: str) -> dict[str, Any]:
             ),
             response_mime_type="application/json",
             temperature=0.2,
-            max_output_tokens=1400,
+            max_output_tokens=1000,
         ),
     )
     text = (response.text or "").strip()

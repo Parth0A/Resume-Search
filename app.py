@@ -3,10 +3,33 @@
 from __future__ import annotations
 
 import io
+from pathlib import Path
+from urllib.request import Request, urlopen
+
+import pandas as pd
 import streamlit as st
 
 from backend import _prepare_export_data, load_resumes, search_resumes
 from ai_features import GeminiConfigurationError, analyze_resume, analyze_skill_gap, generate_job_description
+
+
+DEMO_DATASET_URL = "https://huggingface.co/datasets/mithinsagar/exai-resumeintel-data/resolve/main/clean_resume_data.csv?download=true"
+
+
+@st.cache_data(show_spinner=False)
+def _download_demo_dataset() -> bytes:
+    """Download and normalize the public demo resume dataset."""
+    request = Request(DEMO_DATASET_URL, headers={"User-Agent": "Resume-Search-Demo/1.0"})
+    with urlopen(request, timeout=45) as response:
+        raw_csv = response.read()
+
+    dataframe = pd.read_csv(io.BytesIO(raw_csv))
+    supported_columns = {"Resume_str", "Resume", "ResumeText", "Text", "Content"}
+    if not supported_columns.intersection(dataframe.columns) and "Feature" in dataframe.columns:
+        dataframe = dataframe.rename(columns={"Feature": "Resume_str"})
+    if not supported_columns.intersection(dataframe.columns):
+        raise ValueError("The demo CSV does not contain a supported resume-text column.")
+    return dataframe.to_csv(index=False).encode("utf-8")
 
 
 def _parse_skills(skills_text: str) -> list:
@@ -102,7 +125,7 @@ def _render_results(results: dict) -> None:
 def _main() -> None:
     st.set_page_config(
         page_title="Resume Search",
-        page_icon="🔎",
+        page_icon=str(Path(__file__).parent / "assets" / "resume-search-logo.svg") if (Path(__file__).parent / "assets" / "resume-search-logo.svg").exists() else "📄",
         layout="wide",
         initial_sidebar_state="expanded",
     )
@@ -162,11 +185,18 @@ def _main() -> None:
         }
         div[data-testid="stMultiSelect"] input { background: transparent !important; }
         div.stButton > button, div.stFormSubmitButton > button, div.stDownloadButton > button {
-            border: 1.5px solid var(--rs-border) !important;
+            background: #142b59 !important;
+            color: #ffffff !important;
+            border: 1.5px solid #142b59 !important;
             border-radius: 12px !important;
             font-weight: 650;
             min-height: 2.7rem;
             box-shadow: none !important;
+        }
+        div.stButton > button:hover, div.stFormSubmitButton > button:hover, div.stDownloadButton > button:hover {
+            background: #10234b !important;
+            color: #ffffff !important;
+            border-color: #10234b !important;
         }
         div.stFormSubmitButton > button[kind="primary"] {
             background: var(--rs-navy) !important;
@@ -320,10 +350,93 @@ def _main() -> None:
         }
         .small-note { color: #68758d; font-size: .92rem; }
         .footer-note { color: #7b869b; text-align: center; font-size: .82rem; padding-top: 1.8rem; }
+
+        .hero-brand { display:flex; align-items:center; margin:0 0 .75rem .1rem; }
+        .hero-brand img { object-fit:contain; }
+        .about-hero { position: relative; overflow: hidden; padding: 2rem 2.2rem 2.15rem; border-radius: 24px; color: #fff; background: radial-gradient(circle at 88% 12%, rgba(111,142,255,.32), transparent 30%), linear-gradient(135deg,#0c1830 0%,#142b59 58%,#3558a4 100%); box-shadow: 0 20px 48px rgba(20,43,89,.16); margin: .3rem 0 2.1rem; }
+        .about-topline { display:flex; align-items:center; gap:11px; color:#c8d6ff; font-size:.72rem; font-weight:800; letter-spacing:.16em; }
+        .about-monogram,.about-signoff-mark { display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; width:39px; height:39px; border:1px solid rgba(255,255,255,.32); border-radius:13px; background:rgba(255,255,255,.1); color:#fff; font-size:.85rem; font-weight:850; letter-spacing:-.02em; }
+        .about-status { margin-left:auto; border:1px solid rgba(219,229,255,.3); border-radius:999px; padding:7px 11px; letter-spacing:.1em; font-size:.64rem; }
+        .about-author { margin-top:1.65rem; color:#c7d5ff; font-size:.86rem; }
+        .about-name { margin:.12rem 0 .8rem; color:#fff !important; font-size:clamp(1.9rem,4vw,2.7rem); font-weight:850; letter-spacing:-.045em; line-height:1.12; }
+        .about-rule { width:58px; height:3px; border-radius:4px; background:linear-gradient(90deg,#8ea6ff,#d9e3ff); margin:1.1rem 0 1.35rem; }
+        .about-kicker { color:#b8caff; font-size:.7rem; font-weight:800; letter-spacing:.16em; }
+        .about-title { margin:.4rem 0 .7rem; color:#fff !important; font-size:clamp(2rem,4.5vw,3.3rem); letter-spacing:-.05em; font-weight:850; }
+        .about-lead { max-width:850px; color:#e2eaff !important; font-size:1rem; line-height:1.8; margin:0; }
+        .about-tags { display:flex; flex-wrap:wrap; gap:8px; margin-top:1.35rem; }
+        .about-tags span { padding:7px 11px; border:1px solid rgba(221,231,255,.28); border-radius:999px; color:#f2f5ff; background:rgba(255,255,255,.07); font-size:.76rem; }
+        .about-section-heading { display:flex; align-items:flex-start; gap:14px; margin:2rem 0 1rem; }
+        .about-section-heading > span { display:inline-flex; align-items:center; justify-content:center; min-width:37px; height:37px; border-radius:12px; background:#eaf0ff; border:1px solid #d5e0ff; color:#142b59; font-size:.76rem; font-weight:850; }
+        .about-section-heading h3 { margin:0 0 .2rem; color:#142b59; font-size:1.25rem; font-weight:820; letter-spacing:-.025em; }
+        .about-section-heading p { margin:0; color:#71809a; font-size:.88rem; }
+        .about-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+        .about-card { padding:1.25rem 1.3rem; border:1px solid #dce4f2; border-radius:18px; background:linear-gradient(145deg,#fff,#f8faff); box-shadow:0 8px 24px rgba(24,48,92,.045); }
+        .about-icon { display:flex; align-items:center; justify-content:center; width:42px; height:42px; border-radius:13px; background:#eaf0ff; color:#142b59; font-size:1.4rem; margin-bottom:.85rem; }
+        .about-card h4 { margin:0 0 .45rem; color:#142b59; font-size:1.02rem; font-weight:800; }
+        .about-card p,.about-capabilities p { margin:0; color:#62718b; font-size:.88rem; line-height:1.7; }
+        .about-workflow { padding:1.1rem 1.25rem; border:1px solid #dce4f2; border-radius:18px; background:#fff; }
+        .about-step { display:flex; gap:14px; padding:.85rem 0; }
+        .about-step + .about-step { border-top:1px solid #edf0f7; }
+        .about-step > span { display:flex; align-items:center; justify-content:center; width:36px; height:36px; flex-shrink:0; border-radius:12px; background:#142b59; color:#fff; font-size:.75rem; font-weight:800; }
+        .about-step strong,.about-capabilities strong { color:#172642; font-size:.94rem; }
+        .about-step p { margin:.22rem 0 0; color:#62718b; font-size:.86rem; line-height:1.7; }
+        .about-step code { color:#142b59; background:#edf3ff; padding:2px 5px; border-radius:5px; }
+        .about-capabilities { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 22px; padding:1rem 1.25rem; border:1px solid #dce4f2; border-radius:18px; background:#fff; }
+        .about-capabilities > div { padding:1rem 0; }
+        .about-capabilities > div:nth-child(n+3) { border-top:1px solid #edf0f7; }
+        .about-note { padding:1.2rem 1.35rem; border:1px solid #dce4f2; border-left:4px solid #526fe2; border-radius:16px; background:#fff; }
+        .about-note p { color:#62718b; font-size:.87rem; line-height:1.75; margin:0 0 .8rem; }
+        .about-note p:last-child { margin-bottom:0; }
+        .about-note strong { color:#172642; }
+        .about-signoff { display:flex; align-items:center; gap:12px; margin-top:2rem; padding-top:1.2rem; border-top:1px solid #dfe6f2; }
+        .about-signoff-mark { background:#142b59; border-color:#142b59; }
+        .about-signoff strong { color:#142b59; font-size:.92rem; }
+        .about-signoff p { color:#7b869b; font-size:.78rem; margin:.1rem 0 0; }
+        .about-signoff-line { flex:1; height:1px; margin-left:10px; background:linear-gradient(90deg,#d6deed,transparent); }
+        @media(max-width:700px) { .about-hero { padding:1.35rem 1.15rem 1.5rem; border-radius:18px; } .about-status { font-size:.56rem; padding:6px 8px; } .about-grid,.about-capabilities { grid-template-columns:1fr; } .about-capabilities > div:nth-child(n+2) { border-top:1px solid #edf0f7; } .about-card { padding:1.1rem; } .about-workflow { padding:.8rem 1rem; } .about-step { gap:10px; } }
+
         @media (max-width: 700px) {
             .main .block-container { padding: 1rem .8rem 2rem; }
             .hero { padding: 1.35rem 1.15rem; border-radius: 15px; }
         }
+
+        /* Restore the original navy-and-blue theme while keeping the current layout and profile option. */
+        :root { --rs-navy: #142b59; --rs-navy-strong: #10234b; --rs-border: #18396f; }
+        .stApp { background: #f7f9fd; color: #172642; }
+        [data-testid="stSidebar"] { background: #101b31 !important; }
+        [data-testid="stSidebar"] * { color: #eef3ff !important; }
+        [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p { color: #c7d3ee !important; }
+        .brand-icon { background: linear-gradient(135deg, #4d6bff, #8c74ff) !important; }
+        .brand-accent { color: #8ea6ff !important; }
+        .hero { background: linear-gradient(125deg, #101b31 0%, #233b72 64%, #526fe2 100%) !important; }
+        .hero-kicker { color: #bdcaff !important; }
+        div.stButton > button, div.stFormSubmitButton > button, div.stDownloadButton > button, div[data-testid="stFileUploader"] button {
+            background: var(--rs-navy) !important; color: #ffffff !important; border: 1px solid var(--rs-navy-strong) !important;
+            border-radius: 12px !important; font-weight: 700 !important; min-height: 2.8rem; box-shadow: none !important;
+        }
+        div.stButton > button:hover, div.stFormSubmitButton > button:hover, div.stDownloadButton > button:hover, div[data-testid="stFileUploader"] button:hover {
+            background: var(--rs-navy-strong) !important; color: #ffffff !important;
+        }
+        div.stButton > button:focus, div.stFormSubmitButton > button:focus, div.stDownloadButton > button:focus { outline: 2px solid #8ea6ff !important; outline-offset: 2px !important; }
+        div[data-testid="stMultiSelect"] [data-baseweb="tag"] { background: var(--rs-navy) !important; border-color: var(--rs-navy-strong) !important; }
+        div[data-testid="stProgress"] > div > div { background: linear-gradient(90deg, #18396f, #547dbb) !important; }
+        .home-card-icon { font-size: 2.5rem; color: #ffffff; margin: .2rem 0 .9rem; }
+        .home-card-title { color: #ffffff !important; font-size: 1.35rem; margin: 0 0 .7rem; }
+        .home-card-copy { color: #e0e8ff !important; min-height: 5.5rem; line-height: 1.6; }
+        [class*="st-key-home_card_"] { background: linear-gradient(135deg, #101b31, #233b72) !important; border: 1px solid #18396f !important; border-radius: 22px !important; padding: 1.5rem !important; min-height: 330px; }
+        [class*="st-key-home_card_"] [data-testid="stMarkdownContainer"] p { color: #ffffff !important; }
+        [class*="st-key-home_card_"] div.stButton > button { background: #142b59 !important; color: #ffffff !important; border: 1px solid #8ea6ff !important; border-radius: 999px !important; }
+        [class*="st-key-home_card_"] div.stButton > button:hover { background: #10234b !important; color: #ffffff !important; }
+        [data-testid="stFileUploader"], [data-testid="stForm"], [data-testid="stMetric"], [data-testid="stExpander"], [data-testid="stVerticalBlockBorderWrapper"] { border-color: #18396f !important; border-radius: 16px !important; }
+        @media (max-width: 700px) {
+            .main .block-container { padding: 1rem .8rem 2rem; }
+            [class*="st-key-home_cards"] [data-testid="stHorizontalBlock"] { flex-direction: column !important; gap: 1rem !important; }
+            [class*="st-key-home_cards"] [data-testid="stHorizontalBlock"] > [data-testid="column"] { width: 100% !important; min-width: 100% !important; flex: 1 1 100% !important; }
+            [class*="st-key-home_card_"] { min-height: 250px; width: 100% !important; }
+            .home-card-copy { min-height: 0; }
+            .hero { padding: 1.35rem 1.15rem; border-radius: 15px; }
+        }
+
         </style>
         """,
         unsafe_allow_html=True,
@@ -343,7 +456,7 @@ def _main() -> None:
             .main .block-container { max-width: 1240px; padding-top: 2rem; padding-bottom: 1.5rem; }
             [data-testid="stSidebar"] { display: none; }
             .login-brand-panel { min-height: 590px; padding: 2.5rem 2rem; border-radius: 24px; background: linear-gradient(145deg,#101b31 0%,#243c75 62%,#526fe2 100%); color: white; display:flex; flex-direction:column; justify-content:center; }
-            .login-logo { display:inline-flex; align-items:center; justify-content:center; width:54px; height:54px; border-radius:16px; background:linear-gradient(135deg,#4d6bff,#8c74ff); color:#fff; font-size:1.65rem; font-weight:800; margin-bottom:1.7rem; }
+            .login-logo { display:none; }
             .login-eyebrow { color:#c3d0ff; text-transform:uppercase; letter-spacing:.15em; font-weight:800; font-size:.75rem; }
             .login-title { font-size:clamp(2.4rem,4vw,3.8rem); line-height:1.05; letter-spacing:-.05em; color:#fff; font-weight:850; margin:.7rem 0 1rem; }
             .login-copy { color:#e0e8ff; font-size:1.03rem; line-height:1.75; }
@@ -353,6 +466,90 @@ def _main() -> None:
             div[data-testid="stForm"] { background:#fff; border:1px solid #e1e7f2; border-radius:20px; padding:1.25rem 1.35rem; box-shadow:0 18px 48px rgba(30,48,90,.07); }
             div.stButton > button, div.stFormSubmitButton > button { min-height:2.8rem; border-radius:10px; font-weight:700; }
             .login-foot { color:#8a95a8; text-align:center; font-size:.8rem; margin-top:1.2rem; }
+
+            /* Login form contrast fix: override all earlier global/dark-theme input rules. */
+            div[data-testid="stForm"] div[data-testid="stTextInput"] input,
+            div[data-testid="stForm"] div[data-testid="stTextInput"] input:focus,
+            div[data-testid="stForm"] div[data-testid="stTextInput"] input:hover,
+            div[data-testid="stForm"] div[data-testid="stTextInput"] input:-webkit-autofill,
+            div[data-testid="stForm"] div[data-testid="stTextInput"] input:-webkit-autofill:hover,
+            div[data-testid="stForm"] div[data-testid="stTextInput"] input:-webkit-autofill:focus {
+                background: #ffffff !important;
+                background-color: #ffffff !important;
+                color: #172642 !important;
+                -webkit-text-fill-color: #172642 !important;
+                caret-color: #172642 !important;
+                opacity: 1 !important;
+                box-shadow: 0 0 0 1000px #ffffff inset !important;
+                border: 1.5px solid #18396f !important;
+            }
+            div[data-testid="stForm"] div[data-testid="stTextInput"] input::placeholder {
+                color: #68758d !important;
+                -webkit-text-fill-color: #68758d !important;
+                opacity: 1 !important;
+            }
+            /* Keep both radio choices and their labels visible on the light login page. */
+            div[data-testid="stRadio"] [role="radiogroup"] {
+                display: flex !important;
+                flex-direction: row !important;
+                gap: 1.4rem !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+            }
+            div[data-testid="stRadio"] [role="radio"] {
+                visibility: visible !important;
+                opacity: 1 !important;
+            }
+            div[data-testid="stRadio"] label,
+            div[data-testid="stRadio"] label p,
+            div[data-testid="stRadio"] [data-testid="stMarkdownContainer"],
+            div[data-testid="stRadio"] [data-testid="stMarkdownContainer"] p {
+                color: #172642 !important;
+                -webkit-text-fill-color: #172642 !important;
+                opacity: 1 !important;
+            }
+            div[data-testid="stRadio"] [role="radio"] > div {
+                border-color: #18396f !important;
+            }
+            /* Final high-specificity overrides for Streamlit/BaseWeb login controls. */
+            html body .stApp div[data-testid="stForm"] input,
+            html body .stApp div[data-testid="stTextInput"] input,
+            html body .stApp input[data-baseweb="input"],
+            html body .stApp [data-baseweb="base-input"] input {
+                background-color: #ffffff !important;
+                color: #172642 !important;
+                -webkit-text-fill-color: #172642 !important;
+                caret-color: #172642 !important;
+                opacity: 1 !important;
+                text-shadow: none !important;
+                box-shadow: inset 0 0 0 1000px #ffffff !important;
+            }
+            html body .stApp div[data-testid="stForm"] input::placeholder,
+            html body .stApp div[data-testid="stTextInput"] input::placeholder {
+                color: #68758d !important;
+                -webkit-text-fill-color: #68758d !important;
+                opacity: 1 !important;
+            }
+            html body .stApp div[data-testid="stForm"] [data-baseweb="input"],
+            html body .stApp div[data-testid="stForm"] [data-baseweb="base-input"] {
+                background-color: #ffffff !important;
+                color: #172642 !important;
+            }
+            html body .stApp div[data-testid="stSegmentedControl"] button,
+            html body .stApp div[data-testid="stSegmentedControl"] button *,
+            html body .stApp div[data-testid="stSegmentedControl"] label,
+            html body .stApp div[data-testid="stSegmentedControl"] p {
+                color: #172642 !important;
+                -webkit-text-fill-color: #172642 !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+            }
+            html body .stApp div[data-testid="stSegmentedControl"] button[aria-pressed="true"],
+            html body .stApp div[data-testid="stSegmentedControl"] button[aria-pressed="true"] * {
+                background-color: #18396f !important;
+                color: #ffffff !important;
+                -webkit-text-fill-color: #ffffff !important;
+            }
             @media(max-width:760px) { .login-brand-panel { min-height:unset; padding:1.5rem; margin-bottom:1rem; } .login-title { font-size:2.4rem; } }
             </style>
             """,
@@ -360,10 +557,13 @@ def _main() -> None:
         )
         brand_col, form_col = st.columns([1, 1], gap="large", vertical_alignment="center")
         with brand_col:
+            login_logo_path = Path(__file__).parent / "assets" / "resume-search-logo.svg"
+            if login_logo_path.exists():
+                st.image(str(login_logo_path), width=150)
             st.markdown(
                 """
                 <div class="login-brand-panel">
-                  <div class="login-logo">⌕</div>
+                  <div class="login-logo">Resume Search</div>
                   <div class="login-eyebrow">Smarter candidate discovery</div>
                   <div class="login-title">RESUME<br>SEARCH</div>
                   <p class="login-copy">Find talent. See the fit. Search resumes, compare relevant skills, and build a shortlist with more clarity.</p>
@@ -377,11 +577,21 @@ def _main() -> None:
         with form_col:
             st.markdown('<div class="login-heading">Welcome back</div>', unsafe_allow_html=True)
             st.markdown('<div class="login-muted">Sign in or create an account to continue.</div>', unsafe_allow_html=True)
-            login_mode = st.radio("Account access", ["Sign in", "Create account"], horizontal=True, label_visibility="collapsed", key="login_mode")
+            # Use a segmented control so both authentication modes remain visibly labelled.
+            login_mode = st.segmented_control(
+                "Account access",
+                options=["Sign in", "Create account"],
+                default="Sign in",
+                key="login_mode",
+                label_visibility="collapsed",
+                selection_mode="single",
+                help="Choose whether to sign in or create a new account.",
+            ) or "Sign in"
             with st.form("resume_search_auth_form", clear_on_submit=False):
                 login_email = st.text_input("Email address", placeholder="you@company.com")
                 login_password = st.text_input("Password", type="password", placeholder="At least 8 characters" if login_mode == "Create account" else "Enter your password")
-                login_role = st.selectbox("I am a", ["Recruiter", "Job seeker"])
+                # New accounts use the recruiter workspace; existing accounts retain their saved role.
+                login_role = "Recruiter"
                 auth_submit = st.form_submit_button("Create account" if login_mode == "Create account" else "Sign in", type="primary", use_container_width=True)
             if auth_submit:
                 try:
@@ -394,14 +604,11 @@ def _main() -> None:
                         if user is None:
                             st.error("Email or password is incorrect.")
                     if user is not None:
-                        if user["role"] != login_role:
-                            st.warning(f"This account is registered as {user['role']}. Select that account type to continue.")
-                        else:
-                            st.session_state["resume_search_signed_in"] = True
-                            st.session_state["resume_search_user_id"] = user["id"]
-                            st.session_state["resume_search_email"] = user["email"]
-                            st.session_state["resume_search_role"] = user["role"]
-                            st.rerun()
+                        st.session_state["resume_search_signed_in"] = True
+                        st.session_state["resume_search_user_id"] = user["id"]
+                        st.session_state["resume_search_email"] = user["email"]
+                        st.session_state["resume_search_role"] = user["role"]
+                        st.rerun()
                 except ValueError as error:
                     st.error(str(error))
                 except Exception:
@@ -409,208 +616,426 @@ def _main() -> None:
             st.markdown('<div class="login-foot">Resume Search · Secure password hashing · Local account database</div>', unsafe_allow_html=True)
         return
 
-    # Signed-in prototype controls
+
+    # Keep navigation state in the existing Streamlit session; no backend or data model changes.
+    role = st.session_state.get("resume_search_role", "Recruiter")
+    pages = ["Home", "Gemini AI", "Upload Dataset", "See Resumes", "Edit Profile", "Change Icon", "About This Project"]
+    if role != "Job seeker":
+        pages.append("Search Resume")
+    if "resume_search_page" not in st.session_state:
+        st.session_state["resume_search_page"] = "Home"
+    if st.session_state["resume_search_page"] not in pages:
+        st.session_state["resume_search_page"] = "Home"
+    if "resume_dataset_bytes" not in st.session_state:
+        st.session_state["resume_dataset_bytes"] = None
+        st.session_state["resume_dataset_name"] = None
+    if "resume_search_icon" not in st.session_state:
+        st.session_state["resume_search_icon"] = "⌕"
+
     with st.sidebar:
-        st.markdown(
-            '<div class="brand-mark"><span class="brand-icon">⌕</span><span>Resume <span class="brand-accent">Search</span></span></div>',
-            unsafe_allow_html=True,
-        )
+        logo_path = Path(__file__).parent / "assets" / "resume-search-logo.svg"
+        if logo_path.exists():
+            st.image(str(logo_path), width=112)
+        st.markdown('<div class="brand-mark"><span>Resume <span class="brand-accent">Search</span></span></div>', unsafe_allow_html=True)
+        st.caption(f"Signed in as {role}")
         st.markdown("### Workspace")
-        st.markdown("🏠  **Home**")
-        st.markdown("📄  Upload Resumes")
-        st.markdown("🔎  Search Candidates")
+        nav_items = [("Home", "⌂"), ("Gemini AI", "✦"), ("Upload Dataset", "⇧"), ("See Resumes", "▤")]
+        if role != "Job seeker":
+            nav_items.append(("Search Resume", "⌕"))
+        for page_name, page_icon in nav_items:
+            if st.button(f"{page_icon}  {page_name}", key=f"nav_{page_name}", use_container_width=True):
+                st.session_state["resume_search_page"] = page_name
+                st.rerun()
         st.markdown("---")
-        st.markdown(
-            '<div class="side-note"><b>Simple. Focused. Useful.</b><br>Find relevant resumes, review the evidence, and export your shortlist.</div>',
-            unsafe_allow_html=True,
-        )
-        st.caption("Prototype · CSV-based search")
+        st.markdown("### Account")
+        for page_name, page_icon in [("Edit Profile", "♙"), ("Change Icon", "✎"), ("About This Project", "ⓘ")]:
+            if st.button(f"{page_icon}  {page_name}", key=f"nav_{page_name}", use_container_width=True):
+                st.session_state["resume_search_page"] = page_name
+                st.rerun()
         st.markdown("---")
-        st.caption(f"Signed in as {st.session_state.get('resume_search_role', 'User')}")
-        if st.button("Sign out", use_container_width=True):
+        if st.button("↪  Log Out", key="resume_search_logout", use_container_width=True):
             st.session_state["resume_search_signed_in"] = False
-            st.session_state.pop("resume_search_email", None)
-            st.session_state.pop("resume_search_role", None)
-            st.session_state.pop("resume_search_user_id", None)
+            for key in ("resume_search_email", "resume_search_role", "resume_search_user_id", "resume_search_page"):
+                st.session_state.pop(key, None)
             st.rerun()
 
-    st.markdown(
-        """
-        <div class="hero">
-          <div class="hero-kicker">Candidate discovery workspace</div>
-          <h1>Find the right talent,<br>faster.</h1>
-          <p>Upload your resume dataset, search by role and skills, and review ranked matches in one simple workspace.</p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    page = st.session_state["resume_search_page"]
+    dataset_bytes = st.session_state.get("resume_dataset_bytes")
+    dataset_name = st.session_state.get("resume_dataset_name") or "uploaded_resumes.csv"
 
-    st.markdown("## 1. Upload resumes")
-    st.markdown(
-        '<p class="small-note">Drag and drop your CSV file below. Your file should contain a resume-text column; Category is optional.</p>',
-        unsafe_allow_html=True,
-    )
-    uploaded_file = st.file_uploader(
-        "Drag and drop your resume CSV here, or browse files",
-        type=["csv"],
-        max_upload_size=1024,
-        help="Configured upload limit: 1 GB. Very large datasets may still require substantial memory and processing time.",
-    )
-    if uploaded_file is not None:
-        st.success(f"Dataset ready: {uploaded_file.name} · {uploaded_file.size / (1024 * 1024):.1f} MB")
-        st.caption("Supported resume-text columns: Resume_str, Resume, ResumeText, Text, Content.")
+    if page == "Home":
+        home_logo_path = Path(__file__).parent / "assets" / "resume-search-logo.svg"
+        st.markdown('<div class="hero-brand">', unsafe_allow_html=True)
+        if home_logo_path.exists():
+            st.image(str(home_logo_path), width=64)
+        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown("""<div class="hero"><div class="hero-kicker">Candidate discovery workspace</div><h1>Find the right talent,<br>faster.</h1><p>Use Gemini AI, upload your dataset, or browse your available resumes.</p></div>""", unsafe_allow_html=True)
+        st.markdown('<div class="small-note">Choose where you want to start.</div>', unsafe_allow_html=True)
+        with st.container(key="home_cards"):
+            card_columns = st.columns(3, gap="large")
+            card_data = [
+                ("Gemini AI", "✦", "Analyze resume skills, identify skill gaps, or draft a job description.", "Open Gemini AI"),
+                ("Upload Dataset", "⇧", "Upload a CSV dataset containing resume text.", "Upload Dataset"),
+                ("See Resumes", "▤", "Browse the resumes in your uploaded dataset.", "See Resumes"),
+            ]
+            for column, (card_title, card_icon, description, button_label) in zip(card_columns, card_data):
+                with column:
+                    with st.container(border=True, key=f"home_card_{card_title.lower().replace(' ', '_')}"):
+                        st.markdown(f'<div class="home-card-icon">{card_icon}</div><h2 class="home-card-title">{card_title}</h2><p class="home-card-copy">{description}</p>', unsafe_allow_html=True)
+                        if st.button(button_label, key=f"home_action_{card_title}", use_container_width=True):
+                            st.session_state["resume_search_page"] = card_title
+                            st.rerun()
 
-    st.markdown("## 2. Search resumes")
-    with st.form("search_form", clear_on_submit=False):
-        role_col, exp_col, limit_col = st.columns([2, 1, 1])
-        with role_col:
-            selected_role = st.selectbox(
-                "Choose a job role *",
-                [
-                    "Software Engineer", "Python Developer", "Java Developer",
-                    "Frontend Developer", "Backend Developer", "Full Stack Developer",
-                    "Data Analyst", "Data Scientist", "Machine Learning Engineer",
-                    "AI Engineer", "DevOps Engineer", "Cybersecurity Analyst",
-                    "Web Developer", "Mobile App Developer", "UI / UX Designer",
-                    "QA / Test Engineer", "Other / custom role",
-                ],
-            )
-            if selected_role == "Other / custom role":
-                job_title = st.text_input("Enter your job role *", placeholder="e.g. Embedded Systems Engineer")
-            else:
-                job_title = selected_role
-        with exp_col:
-            min_experience = st.selectbox(
-                "Minimum experience",
-                options=["Any experience", "1 year", "2 years", "3 years", "5 years", "7 years", "10 years"],
-                index=0,
-                help="Unknown experience is excluded when a minimum is selected.",
-            )
-        with limit_col:
-            results_limit = st.selectbox("Candidates to show", options=[5, 10, 25], index=1)
-        skill_options = [
-            "Python", "Java", "JavaScript", "TypeScript", "C", "C++", "C#",
-            "HTML", "CSS", "React", "Angular", "Node.js", "Django", "Flask",
-            "SQL", "MySQL", "PostgreSQL", "MongoDB", "Excel", "Power BI",
-            "Pandas", "NumPy", "Machine Learning", "Deep Learning", "AI",
-            "TensorFlow", "PyTorch", "Git", "GitHub", "Docker", "AWS",
-            "Azure", "Linux", "Cybersecurity", "Networking", "REST API",
-            "Figma", "UI/UX", "Selenium", "Testing", "Communication",
-        ]
-        selected_skills = st.multiselect(
-            "Choose skills / programming languages (optional)",
-            options=skill_options,
-            placeholder="Select one or more skills",
-        )
-        custom_skills_text = st.text_input(
-            "Other skills (optional)",
-            placeholder="Add skills not listed, separated by commas",
-        )
-        submitted = st.form_submit_button("Search resumes", type="primary", use_container_width=True)
-
-    st.caption("* Required field. Search scores measure text relevance and do not make hiring decisions.")
-
-    if submitted:
-        if uploaded_file is None:
-            st.error("Please upload a resume CSV before searching.")
-            return
-        if not job_title.strip():
-            st.error("Enter a job title or role to start the search.")
-            return
-        try:
-            extra_skills = _parse_skills(custom_skills_text)
-            skills = list(dict.fromkeys(selected_skills + extra_skills))
-            experience_value: int | None = None
-            if min_experience != "Any experience":
-                experience_value = int(min_experience.split()[0])
-        except (ValueError, TypeError) as error:
-            st.error(str(error) or "Please check your search criteria.")
-            return
-
-        with st.spinner("Reading resumes and ranking matches…"):
+    elif page == "Upload Dataset":
+        st.markdown("## Upload Dataset")
+        st.caption("Load the demo dataset automatically or upload your own resume CSV.")
+        if st.button("Load Demo Dataset", key="load_demo_dataset", type="primary"):
             try:
-                df = load_resumes(uploaded_file.getvalue(), uploaded_file.name)
-                results = search_resumes(
-                    df=df,
-                    job_title=job_title.strip(),
-                    skills=skills,
-                    min_experience=experience_value,
-                    limit=int(results_limit),
-                )
-                _render_results(results)
+                with st.spinner("Downloading and preparing the demo dataset..."):
+                    demo_bytes = _download_demo_dataset()
+                    load_resumes(demo_bytes, "clean_resume_data.csv")
+                st.session_state["resume_dataset_bytes"] = demo_bytes
+                st.session_state["resume_dataset_name"] = "clean_resume_data.csv"
+                st.success("Demo dataset loaded successfully.")
+                st.rerun()
+            except Exception as error:
+                st.error(f"Could not load the demo dataset: {error}")
+        st.caption("Or upload your own CSV file below.")
+        uploaded_file = st.file_uploader("Choose a resume CSV file", type=["csv"], max_upload_size=1024, help="The file should contain a resume-text column; Category is optional.", key="resume_dataset_uploader")
+        if uploaded_file is not None:
+            try:
+                load_resumes(uploaded_file.getvalue(), uploaded_file.name)
+                st.session_state["resume_dataset_bytes"] = uploaded_file.getvalue()
+                st.session_state["resume_dataset_name"] = uploaded_file.name
+                st.success(f"Dataset ready: {uploaded_file.name} · {uploaded_file.size / (1024 * 1024):.1f} MB")
+                st.caption("Supported resume-text columns: Resume_str, Resume, ResumeText, Text, Content.")
             except ValueError as error:
-                st.error(f"Could not complete the search: {error}")
+                st.error(f"Could not read this dataset: {error}")
             except Exception:
-                st.error("Something went wrong while processing this dataset. Check the CSV and available memory, then try again.")
+                st.error("Could not validate this CSV. Check its format and try again.")
+        # Refresh local values immediately so the See Resumes action appears after this upload.
+        dataset_bytes = st.session_state.get("resume_dataset_bytes")
+        dataset_name = st.session_state.get("resume_dataset_name") or "uploaded_resumes.csv"
+        if dataset_bytes is not None:
+            st.success(f"Current dataset: {dataset_name}")
+            if st.button("See Resumes", key="upload_see_resumes", type="primary"):
+                st.session_state["resume_search_page"] = "See Resumes"
+                st.rerun()
+        else:
+            st.info("After a valid upload, the See Resumes button will appear here.")
 
-    # Optional Gemini tools run only after an explicit button click.
-    st.markdown("---")
-    st.markdown("## 3. Gemini AI tools")
-    st.caption("Optional AI tools for recruiters and job seekers. Resume text is sent to Google Gemini only when you run an AI action.")
-    if uploaded_file is not None:
-        try:
-            ai_df = load_resumes(uploaded_file.getvalue(), uploaded_file.name)
-            from backend import _find_resume_column
-            resume_column = _find_resume_column(ai_df)
-            candidate_index = st.selectbox("Select a resume for AI analysis", options=list(range(len(ai_df))), format_func=lambda idx: f"Candidate {idx + 1}", key="ai_candidate_index")
-            ai_resume_text = str(ai_df.iloc[candidate_index][resume_column] or "")
-            tab_profile, tab_gap, tab_jd = st.tabs(["Resume Intelligence", "Skill Gap Analyzer", "Job Description Generator"])
-            with tab_profile:
-                st.write("Extract a structured profile grounded in one resume.")
-                if st.button("Analyze selected resume", key="ai_analyze_resume", type="primary"):
-                    with st.spinner("Analyzing one resume with Gemini…"):
-                        try:
-                            st.session_state["ai_resume_profile"] = analyze_resume(ai_resume_text)
-                        except (GeminiConfigurationError, ValueError, RuntimeError) as error:
-                            st.error(str(error))
-                        except Exception:
-                            st.error("Gemini request failed. Check your API key, connection, and free-tier quota.")
-                if "ai_resume_profile" in st.session_state:
-                    st.json(st.session_state["ai_resume_profile"])
-            with tab_gap:
-                gap_description = st.text_area("Paste the target job description", height=170, key="ai_gap_description")
-                if st.button("Analyze skill gaps", key="ai_analyze_gap", type="primary"):
-                    with st.spinner("Comparing one resume with the job description…"):
-                        try:
-                            st.session_state["ai_skill_gap"] = analyze_skill_gap(ai_resume_text, gap_description)
-                        except (GeminiConfigurationError, ValueError, RuntimeError) as error:
-                            st.error(str(error))
-                        except Exception:
-                            st.error("Gemini request failed. Check your API key, connection, and free-tier quota.")
-                if "ai_skill_gap" in st.session_state:
-                    st.json(st.session_state["ai_skill_gap"])
-            with tab_jd:
-                jd_title = st.text_input("Job title", key="ai_jd_title", placeholder="e.g. Junior Python Developer")
-                jd_skills = st.text_input("Required skills (comma-separated)", key="ai_jd_skills", placeholder="Python, SQL, Git")
-                left, right = st.columns(2)
-                with left:
-                    jd_level = st.selectbox("Experience level", ["Entry level", "Junior", "Mid-level", "Senior", "Internship"], key="ai_jd_level")
-                with right:
-                    jd_type = st.selectbox("Employment type", ["Full-time", "Part-time", "Internship", "Contract", "Temporary"], key="ai_jd_type")
-                jd_context = st.text_area("Additional context (optional)", key="ai_jd_context", height=90)
-                if st.button("Generate job description", key="ai_generate_jd", type="primary"):
-                    with st.spinner("Drafting a job description with Gemini…"):
-                        try:
-                            st.session_state["ai_job_description"] = generate_job_description(jd_title, [item.strip() for item in jd_skills.split(",") if item.strip()], jd_level, jd_type, jd_context)
-                        except (GeminiConfigurationError, ValueError, RuntimeError) as error:
-                            st.error(str(error))
-                        except Exception:
-                            st.error("Gemini request failed. Check your API key, connection, and free-tier quota.")
-                if "ai_job_description" in st.session_state:
-                    import json
-                    jd_result = st.session_state["ai_job_description"]
-                    st.json(jd_result)
-                    st.download_button("Download job description (JSON)", data=json.dumps(jd_result, indent=2, ensure_ascii=False), file_name="generated_job_description.json", mime="application/json", key="ai_jd_download")
-        except ValueError as error:
-            st.error(f"Could not prepare AI tools: {error}")
-        st.caption("AI output can be incorrect. Verify details, do not use it as the sole basis for hiring decisions, and upload resumes only when you have permission.")
-    else:
-        st.info("Upload a CSV above to enable the Gemini AI tools.")
+    elif page == "See Resumes":
+        st.markdown("## See Resumes")
+        if dataset_bytes is None:
+            st.info("Upload a dataset first to browse resumes.")
+            if role != "Job seeker" and st.button("Upload Dataset", key="empty_resumes_upload", type="primary"):
+                st.session_state["resume_search_page"] = "Upload Dataset"
+                st.rerun()
+        else:
+            try:
+                resumes_df = load_resumes(dataset_bytes, dataset_name)
+                from backend import _find_resume_column
+                resume_column = _find_resume_column(resumes_df)
+                st.caption(f"{len(resumes_df):,} resumes · {dataset_name}")
+                summary_rows = []
+                for idx, row in resumes_df.iterrows():
+                    category = str(row.get("Category", row.get("category", "")) or "").strip()
+                    summary_rows.append({"Candidate": f"Candidate {idx + 1}", "Category": category or "Not specified", "Resume text length": len(str(row[resume_column] or ""))})
+                st.dataframe(summary_rows, use_container_width=True, hide_index=True)
+                st.markdown("### Resume details")
+                candidate_index = st.selectbox("Select a resume to view", options=list(range(len(resumes_df))), format_func=lambda idx: f"Candidate {idx + 1}", key="browse_resume_index")
+                st.text_area("Resume text", value=str(resumes_df.iloc[candidate_index][resume_column] or ""), height=260, disabled=True)
+                if role != "Job seeker" and st.button("Search this dataset", key="browse_to_search", type="primary"):
+                    st.session_state["resume_search_page"] = "Search Resume"
+                    st.rerun()
+            except ValueError as error:
+                st.error(f"Could not display resumes: {error}")
 
-    st.markdown(
-        '<div class="footer-note">Resume Search · Review resume evidence carefully. Automated relevance scores should support—not replace—human judgment.</div>',
-        unsafe_allow_html=True,
-    )
+    elif page == "Search Resume":
+        st.markdown("## Search Resume")
+        if dataset_bytes is None:
+            st.info("Upload a dataset before searching resumes.")
+            if st.button("Upload Dataset", key="search_upload_dataset", type="primary"):
+                st.session_state["resume_search_page"] = "Upload Dataset"
+                st.rerun()
+        else:
+            st.markdown("## 2. Search resumes")
+            with st.form("search_form", clear_on_submit=False):
+                role_col, exp_col, limit_col = st.columns([2, 1, 1])
+                with role_col:
+                    selected_role = st.selectbox(
+                        "Choose a job role *",
+                        [
+                            "Software Engineer", "Python Developer", "Java Developer",
+                            "Frontend Developer", "Backend Developer", "Full Stack Developer",
+                            "Data Analyst", "Data Scientist", "Machine Learning Engineer",
+                            "AI Engineer", "DevOps Engineer", "Cybersecurity Analyst",
+                            "Web Developer", "Mobile App Developer", "UI / UX Designer",
+                            "QA / Test Engineer", "Other / custom role",
+                        ],
+                    )
+                    if selected_role == "Other / custom role":
+                        job_title = st.text_input("Enter your job role *", placeholder="e.g. Embedded Systems Engineer")
+                    else:
+                        job_title = selected_role
+                with exp_col:
+                    min_experience = st.selectbox(
+                        "Minimum experience",
+                        options=["Any experience", "1 year", "2 years", "3 years", "5 years", "7 years", "10 years"],
+                        index=0,
+                        help="Unknown experience is excluded when a minimum is selected.",
+                    )
+                with limit_col:
+                    results_limit = st.selectbox("Candidates to show", options=[5, 10, 25], index=1)
+                skill_options = [
+                    "Python", "Java", "JavaScript", "TypeScript", "C", "C++", "C#",
+                    "HTML", "CSS", "React", "Angular", "Node.js", "Django", "Flask",
+                    "SQL", "MySQL", "PostgreSQL", "MongoDB", "Excel", "Power BI",
+                    "Pandas", "NumPy", "Machine Learning", "Deep Learning", "AI",
+                    "TensorFlow", "PyTorch", "Git", "GitHub", "Docker", "AWS",
+                    "Azure", "Linux", "Cybersecurity", "Networking", "REST API",
+                    "Figma", "UI/UX", "Selenium", "Testing", "Communication",
+                ]
+                selected_skills = st.multiselect(
+                    "Choose skills / programming languages (optional)",
+                    options=skill_options,
+                    placeholder="Select one or more skills",
+                )
+                custom_skills_text = st.text_input(
+                    "Other skills (optional)",
+                    placeholder="Add skills not listed, separated by commas",
+                )
+                submitted = st.form_submit_button("Search resumes", type="primary", use_container_width=True)
+
+            st.caption("* Required field. Search scores measure text relevance and do not make hiring decisions.")
+
+            if submitted:
+                if dataset_bytes is None:
+                    st.error("Please upload a resume CSV before searching.")
+                    return
+                if not job_title.strip():
+                    st.error("Enter a job title or role to start the search.")
+                    return
+                try:
+                    extra_skills = _parse_skills(custom_skills_text)
+                    skills = list(dict.fromkeys(selected_skills + extra_skills))
+                    experience_value: int | None = None
+                    if min_experience != "Any experience":
+                        experience_value = int(min_experience.split()[0])
+                except (ValueError, TypeError) as error:
+                    st.error(str(error) or "Please check your search criteria.")
+                    return
+
+                with st.spinner("Reading resumes and ranking matches…"):
+                    try:
+                        df = load_resumes(dataset_bytes, dataset_name)
+                        results = search_resumes(
+                            df=df,
+                            job_title=job_title.strip(),
+                            skills=skills,
+                            min_experience=experience_value,
+                            limit=int(results_limit),
+                        )
+                        _render_results(results)
+                    except ValueError as error:
+                        st.error(f"Could not complete the search: {error}")
+                    except Exception:
+                        st.error("Something went wrong while processing this dataset. Check the CSV and available memory, then try again.")
+
+
+
+    elif page == "Gemini AI":
+        st.markdown("## Gemini AI")
+        st.caption("Optional AI tools for resume analysis and job-description support.")
+        if role == "Job seeker":
+            st.markdown("### Analyze your resume")
+            own_resume_text = st.text_area("Paste your resume text", height=220, key="job_seeker_resume_text")
+            target_job_text = st.text_area("Paste a target job description", height=160, key="job_seeker_target_job")
+            if st.button("Analyze skill gaps", key="job_seeker_skill_gap", type="primary"):
+                with st.spinner("Analyzing your resume against the target role…"):
+                    try:
+                        st.session_state["job_seeker_gap_result"] = analyze_skill_gap(own_resume_text, target_job_text)
+                    except (GeminiConfigurationError, ValueError, RuntimeError) as error:
+                        st.error(str(error))
+                    except Exception as error:
+                        st.error(f"Gemini request failed ({type(error).__name__}): {error}")
+            if "job_seeker_gap_result" in st.session_state:
+                st.json(st.session_state["job_seeker_gap_result"])
+            st.caption("AI output can be incorrect. Verify suggestions before acting on them.")
+        elif dataset_bytes is None:
+            st.info("Upload a dataset first to enable resume-based Gemini tools.")
+            if st.button("Upload Dataset", key="gemini_upload_dataset", type="primary"):
+                st.session_state["resume_search_page"] = "Upload Dataset"
+                st.rerun()
+        else:
+            # Optional Gemini tools run only after an explicit button click.
+            st.markdown("---")
+            st.markdown("## 3. Gemini AI tools")
+            st.caption("Optional AI tools for recruiters and job seekers. Resume text is sent to Google Gemini only when you run an AI action.")
+            if dataset_bytes is not None:
+                try:
+                    ai_df = load_resumes(dataset_bytes, dataset_name)
+                    from backend import _find_resume_column
+                    resume_column = _find_resume_column(ai_df)
+                    candidate_index = st.selectbox("Select a resume for AI analysis", options=list(range(len(ai_df))), format_func=lambda idx: f"Candidate {idx + 1}", key="ai_candidate_index")
+                    ai_resume_text = str(ai_df.iloc[candidate_index][resume_column] or "")
+                    tab_profile, tab_gap, tab_jd = st.tabs(["Resume Intelligence", "Skill Gap Analyzer", "Job Description Generator"])
+                    with tab_profile:
+                        st.write("Extract a structured profile grounded in one resume.")
+                        if st.button("Analyze selected resume", key="ai_analyze_resume", type="primary"):
+                            with st.spinner("Analyzing one resume with Gemini…"):
+                                try:
+                                    st.session_state["ai_resume_profile"] = analyze_resume(ai_resume_text)
+                                except (GeminiConfigurationError, ValueError, RuntimeError) as error:
+                                    st.error(str(error))
+                                except Exception as error:
+                                    st.error(f"Gemini request failed ({type(error).__name__}): {error}")
+                        if "ai_resume_profile" in st.session_state:
+                            st.json(st.session_state["ai_resume_profile"])
+                    with tab_gap:
+                        gap_description = st.text_area("Paste the target job description", height=170, key="ai_gap_description")
+                        if st.button("Analyze skill gaps", key="ai_analyze_gap", type="primary"):
+                            with st.spinner("Comparing one resume with the job description…"):
+                                try:
+                                    st.session_state["ai_skill_gap"] = analyze_skill_gap(ai_resume_text, gap_description)
+                                except (GeminiConfigurationError, ValueError, RuntimeError) as error:
+                                    st.error(str(error))
+                                except Exception as error:
+                                    st.error(f"Gemini request failed ({type(error).__name__}): {error}")
+                        if "ai_skill_gap" in st.session_state:
+                            st.json(st.session_state["ai_skill_gap"])
+                    with tab_jd:
+                        jd_title = st.text_input("Job title", key="ai_jd_title", placeholder="e.g. Junior Python Developer")
+                        jd_skills = st.text_input("Required skills (comma-separated)", key="ai_jd_skills", placeholder="Python, SQL, Git")
+                        left, right = st.columns(2)
+                        with left:
+                            jd_level = st.selectbox("Experience level", ["Entry level", "Junior", "Mid-level", "Senior", "Internship"], key="ai_jd_level")
+                        with right:
+                            jd_type = st.selectbox("Employment type", ["Full-time", "Part-time", "Internship", "Contract", "Temporary"], key="ai_jd_type")
+                        jd_context = st.text_area("Additional context (optional)", key="ai_jd_context", height=90)
+                        if st.button("Generate job description", key="ai_generate_jd", type="primary"):
+                            with st.spinner("Drafting a job description with Gemini…"):
+                                try:
+                                    st.session_state["ai_job_description"] = generate_job_description(jd_title, [item.strip() for item in jd_skills.split(",") if item.strip()], jd_level, jd_type, jd_context)
+                                except (GeminiConfigurationError, ValueError, RuntimeError) as error:
+                                    st.error(str(error))
+                                except Exception as error:
+                                    st.error(f"Gemini request failed ({type(error).__name__}): {error}")
+                        if "ai_job_description" in st.session_state:
+                            import json
+                            jd_result = st.session_state["ai_job_description"]
+                            st.json(jd_result)
+                            st.download_button("Download job description (JSON)", data=json.dumps(jd_result, indent=2, ensure_ascii=False), file_name="generated_job_description.json", mime="application/json", key="ai_jd_download")
+                except ValueError as error:
+                    st.error(f"Could not prepare AI tools: {error}")
+                st.caption("AI output can be incorrect. Verify details, do not use it as the sole basis for hiring decisions, and upload resumes only when you have permission.")
+            else:
+                st.info("Upload a CSV above to enable the Gemini AI tools.")
+
+
+
+    elif page == "Edit Profile":
+        profile_logo_path = Path(__file__).parent / "assets" / "resume-search-logo.svg"
+        profile_col, profile_title_col = st.columns([0.55, 5], vertical_alignment="center")
+        with profile_col:
+            if profile_logo_path.exists():
+                st.image(str(profile_logo_path), width=42)
+        with profile_title_col:
+            st.markdown("## Resume Search")
+        st.markdown("### Edit Profile")
+        st.caption("Display preferences apply to this browser session; the account database is unchanged.")
+        st.text_input("Account email", value=st.session_state.get("resume_search_email", ""), disabled=True)
+        display_name = st.text_input("Display name", value=st.session_state.get("resume_search_display_name", ""), key="profile_display_name_input")
+        if st.button("Save Profile", key="save_profile", type="primary"):
+            st.session_state["resume_search_display_name"] = display_name.strip()
+            st.success("Display name saved for this session.")
+
+    elif page == "Change Icon":
+        st.markdown("## Change Icon")
+        icon_options = ["⌕", "✦", "🔎", "📄", "🟢", "💼", "✨"]
+        current_icon = st.session_state.get("resume_search_icon", "⌕")
+        selected_icon = st.selectbox("Choose your workspace icon", icon_options, index=icon_options.index(current_icon) if current_icon in icon_options else 0)
+        if st.button("Save Icon", key="save_workspace_icon", type="primary"):
+            st.session_state["resume_search_icon"] = selected_icon
+            st.success("Workspace icon updated for this session.")
+
+    elif page == "About This Project":
+        about_logo_path = Path(__file__).parent / "assets" / "resume-search-logo.svg"
+        if about_logo_path.exists():
+            st.image(str(about_logo_path), width=150)
+        st.markdown(
+            """
+            <section class="about-hero">
+              <div class="about-topline"><span class="about-monogram">PA</span><span>PROJECT OVERVIEW</span><span class="about-status">FIELD PROJECT</span></div>
+              <div class="about-author">Created by</div>
+              <h1 class="about-name">Parth Andhale</h1>
+              <div class="about-rule"></div>
+              <div class="about-kicker">SMARTER CANDIDATE DISCOVERY</div>
+              <h2 class="about-title">Resume Search</h2>
+              <p class="about-lead">A resume exploration and candidate-matching workspace designed to help users search resume datasets, compare relevant skills, review ranked results, and access optional AI-assisted insights—all in one place.</p>
+              <div class="about-tags"><span>Resume discovery</span><span>Skill matching</span><span>Gemini AI tools</span></div>
+            </section>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        st.markdown('<div class="about-section-heading"><span>01</span><div><h3>What the app does</h3><p>From a resume dataset to a clearer shortlist.</p></div></div>', unsafe_allow_html=True)
+        st.markdown(
+            """
+            <div class="about-grid">
+              <article class="about-card"><div class="about-icon">⌕</div><h4>Search &amp; rank resumes</h4><p>Search an uploaded dataset using a job role and optional skills. Apply a minimum-experience filter and choose how many candidates to display.</p></article>
+              <article class="about-card"><div class="about-icon">▤</div><h4>Browse candidate records</h4><p>Explore the uploaded resumes, review available categories, inspect resume text, and move from browsing to searching the same dataset.</p></article>
+              <article class="about-card"><div class="about-icon">✦</div><h4>Gemini AI assistance</h4><p>When configured, Gemini-powered tools can summarize a resume into a structured profile, compare resume skills with a job description, and draft a job description.</p></article>
+              <article class="about-card"><div class="about-icon">⇩</div><h4>Review &amp; export results</h4><p>See ranked candidates, detected experience, requested skills found or not detected, text-relevance scores, and download ranked results as a CSV file.</p></article>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        st.markdown('<div class="about-section-heading"><span>02</span><div><h3>How it works</h3><p>A simple workflow for exploring resume data.</p></div></div>', unsafe_allow_html=True)
+        st.markdown(
+            """
+            <div class="about-workflow">
+              <div class="about-step"><span>01</span><div><strong>Upload a dataset</strong><p>Choose a CSV containing resume text. Supported text-column names include <code>Resume_str</code>, <code>Resume</code>, <code>ResumeText</code>, <code>Text</code>, and <code>Content</code>. A category column is optional.</p></div></div>
+              <div class="about-step"><span>02</span><div><strong>Set search criteria</strong><p>Choose a job role, optionally select relevant skills, set a minimum experience level, and select the number of results to show.</p></div></div>
+              <div class="about-step"><span>03</span><div><strong>Review the shortlist</strong><p>Compare relevance scores, detected experience, skill matches, and the underlying resume text. Export the ranked results when needed.</p></div></div>
+              <div class="about-step"><span>04</span><div><strong>Use AI tools when useful</strong><p>Open Gemini AI for resume-profile analysis, skill-gap comparison, or job-description drafting. AI output should always be checked.</p></div></div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        st.markdown('<div class="about-section-heading"><span>03</span><div><h3>Workspace &amp; capabilities</h3><p>The main tools available in Resume Search.</p></div></div>', unsafe_allow_html=True)
+        st.markdown(
+            """
+            <div class="about-capabilities">
+              <div><strong>Home</strong><p>Quick access to Gemini AI, Upload Dataset, and See Resumes.</p></div>
+              <div><strong>Upload Dataset</strong><p>Validate and load a resume CSV into the current Streamlit session.</p></div>
+              <div><strong>See Resumes</strong><p>Browse dataset records and inspect the text for an individual resume.</p></div>
+              <div><strong>Search Resume</strong><p>Recruiter workspace for role-based, skill-aware and experience-filtered candidate search.</p></div>
+              <div><strong>Edit Profile &amp; Change Icon</strong><p>Adjust the display name and workspace icon for the current session.</p></div>
+              <div><strong>Account access</strong><p>Create an account or sign in as a Recruiter or Job seeker using the app's local account database.</p></div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        st.markdown('<div class="about-section-heading"><span>04</span><div><h3>Important notes</h3><p>Clear expectations about data, AI, and scoring.</p></div></div>', unsafe_allow_html=True)
+        st.markdown(
+            """
+            <div class="about-note">
+              <p><strong>Relevance is not a hiring decision.</strong> Search scores represent text similarity to the search terms. They are not hiring probabilities, verified qualifications, or a measure of a person's overall ability.</p>
+              <p><strong>Human review matters.</strong> Read the original resume evidence and verify important details before making decisions. Gemini-generated output can be inaccurate and should not be the sole basis for hiring decisions.</p>
+              <p><strong>Session-based dataset and preferences.</strong> Uploaded resume data and display preferences are held in the current Streamlit session; these interface changes do not make them permanent. Upload only resume data you have permission to use.</p>
+              <p><strong>AI setup.</strong> Gemini features require valid API configuration and may be affected by connection or usage limits.</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.markdown('<div class="about-signoff"><span class="about-signoff-mark">PA</span><div><strong>Parth Andhale</strong><p>Resume Search · Project overview</p></div><span class="about-signoff-line"></span></div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="footer-note">Resume Search · Review resume evidence carefully. Automated relevance scores should support—not replace—human judgment.</div>', unsafe_allow_html=True)
+
 
 
 if __name__ == "__main__":
